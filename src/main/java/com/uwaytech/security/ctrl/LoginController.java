@@ -28,7 +28,6 @@ public class LoginController {
     @Resource
     private LoginService loginService;
 
-
     /**
      * 用户登录
      *
