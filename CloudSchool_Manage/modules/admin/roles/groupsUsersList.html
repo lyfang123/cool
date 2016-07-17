@@ -1,0 +1,92 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="cancel" type="button" value="返回" class="bg_ffffff"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "姓名", EN: "userName", Align: "center"},
+            {CH: "电话", EN: "userPhone", Align: "center"},
+            {CH: "管理员", EN: "leader", Align: "center", Option: {true: "<input class='setLeader' type='checkbox' checked />", false: "<input class='setLeader' type='checkbox' />"}}
+            
+        ];
+        var groupId = getUrlParam("id");
+        var list = new List(ucIP + "/api/uc/v0.1/groups/" + groupId + "/users", option, config);
+        list.listNumTitle = "序号";
+        list.btns = "<span class=\"listDelete bg_f11c1c\">删除</span>";
+        list.checkBtn = false;
+        list.load(function () {
+            //操作
+            //删除
+           $(".listDelete").click(function(){
+               var id = JSON.parse($(this).parents("tr").attr("data")).userId;
+               confirmx("确定要删除吗？",function(){
+                   var ajax = new Ajax(ucIP + "/api/uc/v0.1/groups/" + groupId + "/users/" + id);
+                   ajax.meth = "DELETE";
+                   ajax.loading.msg = "正在删除...";
+                   ajax.do(function(res){
+                      if(res && res.result){
+                          alertx("<div style='color:#ff0000;font-weight:bold;'>删除组成员成功</div>",function(){
+                              list.reLoad();
+                          });
+                      }else{
+                          var msg = "<div style='color:#ff0000;font-weight:bold;'>删除组成员失败</div>";
+                          if(res && !res.result && res.msg){
+                              msg += res.msg;
+                          }
+                          alertx(msg);
+                      }
+                   });
+               })
+           })
+           //设置群组管理员
+           $(".setLeader").click(function(){
+              var data = JSON.parse($(this).parents("tr").attr("data"));
+              var ajax = new Ajax(ucIP + "/api/uc/v0.1/groups/" + groupId + "/leaders" + (data.leader ? "/" + data.userId : ""));
+              ajax.data = {userId:data.userId,groupId:groupId};
+              ajax.meth = data.leader ? "DELETE" : "POST";
+              ajax.do(function(res){
+                if(res && res.result){
+                  alertx("操作成功",function(){
+                    list.reLoad();
+                  })
+                }
+              })
+           })
+        });
+        //新增
+        var roleUser = new InputSelect($("#addBtn"),ucIP + "/api/uc/v0.1/teachers",{pageSize: 10, pageNum: 1,name:'',schoolId:schoolId,key:"name"},"<div class='autoList' vaule='${accountId}'><b class='listStyle_cicle icon_img' imgUrl='${photo}'>$listStyle{name}</b><span>${name}</span><span style='color:#ccc;display:block;'>${name}</span></div>",1,function(res){
+              if(res.length > 0){
+                  var ajax = new Ajax(ucIP + "/api/uc/v0.1/groups/" + groupId + "/users");
+                  ajax.data = {userId:res[0].accountId,groupId:groupId};
+                  ajax.meth = "POST";
+                  ajax.do(function(res){
+                      if(res && res.result){
+                          alertx("<div style='color:#ff0000;font-weight:bold;'>新增组成员成功</div>",function(){
+                              list.reLoad();
+                          });
+                      }else{
+                          var msg = "<div style='color:#ff0000;font-weight:bold;'>新增组成员失败</div>";
+                          if(res && !res.result && res.msg){
+                              msg += res.msg;
+                          }
+                          alertx(msg);
+                      }
+                  });
+              }
+          })
+        $("#cancel").click(function(){
+            back(-1);
+        });
+    }
+</script>

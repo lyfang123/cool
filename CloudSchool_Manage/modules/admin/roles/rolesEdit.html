@@ -1,0 +1,145 @@
+﻿<form class="form">
+    <div class="form_title"><b>角色信息编辑</b><span class="red">(*为必填项)</span></div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>角色名称</div>
+        <span class="data_error">角色名称不能为空</span><input class="input" id="data-roleName" type="text" placeholder="请填写角色名称"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title">角色描述</div>
+        <span class="data_error">角色描述不能为空</span><input class="input" id="data-roleDesc" type="text" placeholder="请填写角色描述"/>
+    </div>
+    <div class="data widthAll">
+        <div class="data_title">角色人员</div>
+        <div id="data-userList"></div><div style="width: 70px;height: 70px; line-height: 60px; text-align: center; font-size: 40px; float: left; cursor: pointer; color: #e4e4e4; border: 2px dashed #e4e4e4;">+</div>
+    </div>
+    <div class="clear"></div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<style type="text/css">
+    .tree{
+        margin: 10px 20px;
+        border:1px solid #e4e4e4;
+    }
+    .nodeData{
+        border-bottom:1px dashed #e4e4e4;
+        padding: 5px 0px;
+    }
+    .nodeData:hover{
+        background: #f9f9f9;
+    }
+    .lastNode .nodeData{
+        border:none; 
+    }
+</style>
+<script>
+    function load() {
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            roleId : getUrlParam("id"),
+            roleName : $("#data-roleName"),
+            roleDesc : $("#data-roleDesc"),
+            userList : new Person($("#data-userList"),$("#data-userList").next(),ucIP + "/api/uc/v0.1/teachers",{pageSize: 10, pageNum: 1,keyword:'',key:"keyword"},"<div class='autoList' vaule='${accountId}'>$has{accountId}<b class='listStyle_cicle icon_img' imgUrl='${photo}'>$listStyle{name}</b><span>${name}</span><span style='color:#ccc;display:block;'>${groupName} ${phone}</span></div>","accountId","<div accountId='${accountId}' class='personData'><img url='${photo}' src='images/headPortrait.png' /><div>${name}</div></div>")
+        }
+
+        //专业名称验证方法
+        from.roleName.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "角色名称不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.roleName.blur(function () {
+            from.roleName.verify();
+        });
+
+        
+        //修改的时候根据id加载数据
+        if(from.roleId){
+            var ajax = new Ajax(webIP + "/api/security/v0.1/roles/" + (from.roleId ? from.roleId : 0));
+            ajax.do(function(res){
+                for(var key in from){
+                    switch(key){
+                        case "roleId":
+                            from[key] = res["id"];
+                            break;
+                        default:
+                            from[key].val(res[key]);
+                            break;
+                    }
+                }
+            });
+        }
+
+        //操作及验证
+        $("#submit").click(function () {
+            $(".data_error").hide();
+            var isOk = true;
+            var obj = {};
+//            var data = {schoolId:schoolId};//上传参数
+            obj["schoolId"] = schoolId;
+            for(var k in from){
+                if(from[k] && typeof(from[k]) == "object" && "verify" in from[k]) {
+                    isOk = !from[k].verify ? isOk : (!from[k].verify() ? false : isOk);//验证
+                }
+//                data[k] = from[k].val ? from[k].val() : from[k];//封装
+                if(k == 'roleId'){
+                    obj["id"] = from[k].val ? from[k].val() : from[k];
+                }else if(k != 'userList'){
+                    obj[k] = from[k].val ? from[k].val() : from[k];
+                }
+            }
+            var list = [];
+            $("#data-userList").find(".personData").each(function(){
+                var accountId = $(this).attr("accountid");
+                var photo = $(this).find("img").attr("src");
+                var name = $(this).find("div").text();
+                list.push({"userId":accountId,"name":name,"roleId":from.roleId,"photo":photo})
+            });
+            obj["userList"] = list;
+            if(isOk){
+                var json = JSON.stringify(obj);
+                var url = webIP + "/api/security/v0.1/roles";
+                ajax = new Ajax(url);
+                ajax.data = json; //data;
+                ajax.header.push({key:"content-type",vaule:"application/json;charset=utf-8"});
+                ajax.meth = from.roleId ? "PUT" : "POST";
+                ajax.title = "提交角色信息";
+                ajax.do(submitResult);
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //错误提示
+        function dataError(obj, msg) {
+            obj = obj.parents(".data");
+            if (!obj.attr("errorMsg")) obj.attr("errorMsg", msg);
+            if (!msg) msg = obj.attr("errorMsg");
+            obj.find(".data_error").html(msg);
+            obj.find(".data_error").show();
+        }
+        //提交后结果
+        function submitResult(res,title){
+            if(res && (res.result || res.id || res.dataId)){
+                alertx("<div style='color:#ff0000;font-weight:bold;'>" + title + "成功</div>",function(){
+                    back(-1);
+                });
+            }else{
+                var msg = "<div style='color:#ff0000;font-weight:bold;'>" + title + "失败</div>";
+                if(res && res.errorMsg){
+                    msg += res.errorMsg;
+                }else{
+                    msg += "服务器错误";
+                }
+                alertx(msg);
+            }
+        }
+    }
+</script>

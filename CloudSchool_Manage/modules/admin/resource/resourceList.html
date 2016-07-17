@@ -1,0 +1,61 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+    .openTotal{
+        color: #1bb1e0;
+        cursor: pointer;
+        background: url("images/icon_link.png") right center no-repeat;
+        padding-right: 20px;
+    }
+    .openTotal:hover{
+        background: url("images/icon_link_active.png") right center no-repeat;
+    }
+    .openDownloadNum{
+        color: #fb6412;
+        cursor: pointer;
+        background: url("images/icon_link.png") right center no-repeat;
+        padding-right: 20px;
+    }
+    .openDownloadNum:hover{
+        background: url("images/icon_link_active.png") right center no-repeat;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+        	{CH: "供应商名称", EN: "name",Align:"center"},
+            {CH: "资源总数", EN: "total",Align:"center",htmlFormat: "<span class='openTotal'>{total}</span>"},
+            {CH: "下载总数", EN: "downloadNum",Align:"center",htmlFormat: "<span class='openDownloadNum'>{downloadNum}</span>"},
+            {CH: "e币收入", EN: "eCoin",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/resource/v0.1/supplier", option, config);
+        list.load(function () {
+            //查看资源总数详情
+            $(".openTotal").click(function(){
+                var data = $(this).parent().parent().attr("data");
+                data = JSON.parse(data);
+                open({url:"modules/admin/resource/reviewList.html",title:"供应商 " + data.name + " 资源信息",data:{id:data.id}});
+            })
+            //查看下载详情
+            $(".openDownloadNum").click(function(){
+                var data = $(this).parent().parent().attr("data");
+                data = JSON.parse(data);
+                open({url:"modules/admin/finance/downloadList.html",title:"供应商 " + data.name + " 资源下载详情",data:{id:data.id}});
+            })
+        });
+        $("#downLoadExcel").click(function(){
+            list.toExcel("供应商资源统计信息");
+        })
+    }
+</script>

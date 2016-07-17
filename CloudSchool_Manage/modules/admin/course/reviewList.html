@@ -1,0 +1,127 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="name" class="input" type="text" placeholder="课程名称"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+        </div>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <input id="cancel" type="button" value="返回" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var id = getUrlParam("id");
+        var option;
+        if(!id){
+            $("#cancel").hide();
+            option = {pageSize: 10, pageNum: 1};
+        }else{
+            option = {pageSize: 10, pageNum: 1,groupId:id};
+        }
+        var config = [
+            {CH: "课程缩略图", EN: "imgUrl",Align:"center",htmlFormat: "<div style='height:60px;overflow:hidden;'><img width='90' src='{imgUrl}' /></div>"},
+            {CH: "课程名称", EN: "name",Align:"center"},
+            {CH: "上传时间", EN: "createTime",Align:"center"},
+            {CH: "结束时间", EN: "endTime",Align:"center"},
+            {CH: "审核状态", EN: "checkStatus",Align:"center",Option:{"0":"未审核","1":"未审核","2":"通过","3":"未通过"},OptionExcel:{"0":"未审核","1":"未审核","2":"通过","3":"未通过"}}
+        ];
+        var list = new List(webIP + "/api/course/v0.1/list", option, config);
+        list.btns = "<span class=\"listLook bg_dfba49\">查看</span>";
+        list.load(function () {
+            $("tr").each(function(i){
+                if(i > 0){
+                    var data = JSON.parse($(this).attr("data"));
+                    //审核
+                    var checkStatusBtn = "";
+                    if(data.checkStatus == 2){
+                        checkStatusBtn = "<span title='审核' style='background:url(images/icon_recommend_active.png) no-repeat;color:rgba(255,255,255,0);' class='checkStatusBtn'>审核</span>";
+                    }else{
+                        checkStatusBtn = "<span title='审核' style='background:url(images/icon_recommend.png) no-repeat;color:rgba(255,255,255,0);' class='checkStatusBtn'>审核</span>";
+                    }
+                    $(this).find(".tdBtns").append(checkStatusBtn);
+                    $(this).find(".checkStatusBtn").click(function(){
+                        confirmx("<div><input id='checkStatusCheckbox' type='checkbox' />通过<br /><textarea id='checkStatusReason' style='padding:5px;border:1px solid #e4e4e4;' placeholder='理由'></textarea></div>",function(){
+                            var checkStatusReason = $("#checkStatusReason").val();
+                            var checked = $("#checkStatusCheckbox")[0].checked;
+                            if(!checked && checkStatusReason == ""){
+                                alertx("<b class='red'>不通过理由不能为空</b>");
+                                return false;
+                            }else{
+                                var ajax = new Ajax(webIP + "/api/course/v0.1/review");
+                                ajax.meth = "PUT";
+                                ajax.data = {courseId:data.courseId,checkStatus:!checked ? 3 : 2,reason:checkStatusReason};
+                                ajax.do(function(res){
+                                    if(res && res.result){
+                                        alertx("操作成功",function(){
+                                            list.load();
+                                        });
+                                    }else{
+                                        alertx("操作失败," + res.errorMsg);
+                                    }
+                                });
+                            }
+                        },function(){
+                            $("#checkStatusCheckbox")[0].checked = data.checkStatus == 2 ? true : false;
+                            $("#checkStatusReason").val(data.reason);
+                        })
+                    })
+                }
+            })
+            //查看资源信息
+            $(".listLook").click(function(){
+                open({url:"modules/admin/course/reviewEdit.html",title:"查看课程信息",data:{id:JSON.parse($(this).parents("tr").attr("data")).courseId}});
+            });
+        });
+        //开始日期
+        var startTime = new Calendar($("#startTime"));
+        $("#startTime").val("");
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        $("#endTime").val("");
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        $("#downLoadExcel").click(function(){
+            list.toExcel("资源信息");
+        })
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endTime").val();
+            list.paramet.name = $("#name").val();
+            list.reLoad();
+        })
+    }
+</script>

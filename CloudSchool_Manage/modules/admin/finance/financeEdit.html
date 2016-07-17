@@ -1,0 +1,325 @@
+﻿<form class="form">
+    <div class="form_title"><b>供应商基本信息</b><span class="red">(*为必填项)</span></div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>供应商账号</div>
+        <span class="data_error">供应商账号不能为空</span><input class="input" id="data-account" type="text" placeholder="请填写供应商账号"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>供应商名称</div>
+        <span class="data_error">供应商名称不能为空</span><input class="input" id="data-name" type="text" placeholder="请填写供应商名称"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>联系人</div>
+        <span class="data_error">联系人不能为空</span><input class="input" id="data-contacts" type="text" placeholder="请填写联系人"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>联系手机</div>
+        <span class="data_error">联系手机不能为空</span><input class="input" id="data-phone" type="text" placeholder="请填写联系手机号码"/>
+    </div>
+    <div class="data width100">
+        <div class="data_title"><span class="red">*</span>联系地址</div>
+        <span class="data_error">联系地址不能为空</span><input class="input" id="data-address" type="text" placeholder="请填写联系地址"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>主营业务</div>
+        <span class="data_error">主营业务不能为空</span><input class="input" id="data-businessType" type="text" placeholder="请填写主营业务"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>网址</div>
+        <span class="data_error">网址不能为空</span><input class="input" id="data-webUrl" type="text" placeholder="请填写网站地址"/>
+    </div>
+    <div class="form_title"><b>供应商财务信息</b><span class="red">(*为必填项)</span></div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>银行账号</div>
+        <span class="data_error">银行账号不能为空</span><input class="input" id="data-bankAccount" type="text" placeholder="请填写银行账号"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>银行名称</div>
+        <span class="data_error">银行名称不能为空</span><input class="input" id="data-bankName" type="text" placeholder="请填写银行名称"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>开户人姓名</div>
+        <span class="data_error">开户人姓名不能为空</span><input class="input" id="data-accountName" type="text" placeholder="请填写开户人姓名"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>供应商分账占比</div>
+        <span class="data_error">供应商分账占比不能为空</span><input class="input" id="data-proportion" type="text" placeholder="0-1之间的数字"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>E币兑换比例</div>
+        <span class="data_error">E币兑换比例不能为空</span><input class="input" id="data-eExchange" type="text" placeholder="大于0的数字"/>
+    </div>
+    <div class="clear"></div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<script>
+    function load() {
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            id : getUrlParam("id"),
+            account : $("#data-account"),
+            name : $("#data-name"),
+            contacts : $("#data-contacts"),
+            phone : $("#data-phone"),
+            address : $("#data-address"),
+            businessType : $("#data-businessType"),
+            webUrl : $("#data-webUrl"),
+            bankAccount : $("#data-bankAccount"),
+            bankName : $("#data-bankName"),
+            accountName : $("#data-accountName"),
+            proportion : $("#data-proportion"),
+            eExchange : $("#data-eExchange")
+        }
+        //用户名验证方法
+        from.account.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "供应商用户名不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.account.blur(function () {
+            from.account.verify();
+        });
+
+        //供应商名称验证方法
+        from.name.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "供应商名称不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.name.blur(function () {
+            from.name.verify();
+        });
+
+        //联系人验证方法
+        from.contacts.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "联系人不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.contacts.blur(function () {
+            from.contacts.verify();
+        });
+
+        //联系手机验证方法
+        from.phone.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "联系手机不能为空");
+                return false;
+            } else if(!Verify.Phone(this.val())){
+                dataError(this, "手机号码格式错误");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.phone.blur(function (){
+            from.phone.verify();
+        });
+
+        //联系地址验证方法
+        from.address.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "联系地址不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.address.blur(function (){
+            from.address.verify();
+        });
+
+        //主营业务验证方法
+        from.businessType.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "主营业务不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.businessType.blur(function (){
+            from.businessType.verify();
+        });
+
+        //网址验证方法
+        from.webUrl.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "网址不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.webUrl.blur(function (){
+            from.webUrl.verify();
+        });
+
+        //银行账号验证方法
+        from.bankAccount.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "银行账号不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.bankAccount.blur(function (){
+            from.bankAccount.verify();
+        });
+
+        //银行名称验证方法
+        from.bankName.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "银行名称不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.bankName.blur(function (){
+            from.bankName.verify();
+        });
+
+        //开户人姓名验证方法
+        from.accountName.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "开户人姓名不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.accountName.blur(function (){
+            from.accountName.verify();
+        });
+
+        //供应商分账占比验证方法
+        from.proportion.verify = function(){
+            var v = this.val();
+            if(/\d/.test(v) && v > 0 && v < 1){
+                return true;
+            }else{
+                dataError(this, "供应商分账占比为0-1之间的数字");
+                return false;
+            }
+        };
+
+        from.proportion.blur(function (){
+            from.proportion.verify();
+        });
+
+        //供应商分账占比验证方法
+        from.eExchange.verify = function(){
+            var v = this.val();
+            if(/\d/.test(v) && v > 0){
+                return true;
+            }else{
+                dataError(this, "E币兑换比例为大于0的数字");
+                return false;
+            }
+        };
+
+        from.eExchange.blur(function (){
+            from.eExchange.verify();
+        });
+        
+        //修改的时候根据id加载数据
+        if(from.id){
+            from.account.attr("readOnly","true");
+            from.account.css("border","none");
+            var ajax = new Ajax(webIP + "/api/supplier/v0.1/" + from.id + "/detail");
+            ajax.do(function(res){
+                for(var key in from){
+                    switch(key){
+                        case "id":
+                            from[key] = res["id"];
+                            break;
+                        default:
+                            from[key].val(res[key]);
+                            break;
+                    }
+                }
+            });
+        }
+
+        //操作及验证
+        $("#submit").click(function () {
+            $(".data_error").hide();
+            var isOk = true;
+            var data = {};
+//            var data = {schoolId:schoolId};//上传参数
+            data["schoolId"] = schoolId;
+            for(var k in from){
+                if(from[k] && typeof(from[k]) == "object" && "verify" in from[k]) {
+                    isOk = !from[k].verify ? isOk : (!from[k].verify() ? false : isOk);//验证
+                }
+//                data[k] = from[k].val ? from[k].val() : from[k];//封装
+                if(k == 'id'){
+                    data["id"] = from[k].val ? from[k].val() : from[k];
+                }else{
+                    data[k] = from[k].val ? from[k].val() : from[k];
+                }
+            }
+            if(isOk){
+                var url = webIP + "/api/supplier/v0.1";
+                ajax = new Ajax(url);
+                ajax.data = JSON.stringify(data);
+                ajax.header.push({key:"Content-Type",vaule:"application/json"});
+                ajax.meth = from.id ? "PUT" : "POST";
+                ajax.title = "提交供应商信息";
+                ajax.do(submitResult);
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //错误提示
+        function dataError(obj, msg) {
+            obj = obj.parents(".data");
+            if (!obj.attr("errorMsg")) obj.attr("errorMsg", msg);
+            if (!msg) msg = obj.attr("errorMsg");
+            obj.find(".data_error").html(msg);
+            obj.find(".data_error").show();
+        }
+        //提交后结果
+        function submitResult(res,title){
+            if(res && (res.result || res.id || res.dataId)){
+                alertx("<div style='color:#ff0000;font-weight:bold;'>" + title + "成功</div>",function(){
+                    back(-1);
+                });
+            }else{
+                var msg = "<div style='color:#ff0000;font-weight:bold;'>" + title + "失败</div>";
+                if(res && res.errorMsg){
+                    msg += res.errorMsg;
+                }else{
+                    msg += "服务器错误";
+                }
+                alertx(msg);
+            }
+        }
+    }
+</script>

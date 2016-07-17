@@ -1,0 +1,102 @@
+﻿<form class="form">
+    <div class="form_title"><b>e币兑换规则编辑</b><span class="red">(*为必填项)</span></div>
+    <div class="data width100">
+        <div class="data_title"><span class="red">*</span>充值金额</div>
+        <span class="data_error">不能为空</span><input class="input" id="data-rmb" type="text" placeholder="人民币金额，单位元"/>
+    </div>
+    <div class="data width100">
+        <div class="data_title"><span class="red">*</span>对应e币</div>
+        <span class="data_error">不能为空</span><input class="input" id="data-eCoin" type="text" placeholder="e币个数，单位个"/>
+    </div>
+    <div class="clear"></div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<script>
+    function load() {
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            rmb : $("#data-rmb"),
+            eCoin : $("#data-eCoin")
+        }
+
+        //人民币金额验证方法
+        from.rmb.verify = function(){
+            if (/\d/.test(this.val()) && this.val() > 0) {
+                return true;
+            } else {
+                dataError(this, "金额必须为大于0的数字");
+                return false;
+            }
+        };
+
+        from.rmb.blur(function () {
+            from.rmb.verify();
+        });
+
+        //e币个数验证方法
+        from.eCoin.verify = function(){
+            if (/\d/.test(this.val()) && this.val() > 0) {
+                return true;
+            } else {
+                dataError(this, "e币个数必须大于0");
+                return false;
+            }
+        };
+
+        from.eCoin.blur(function () {
+            from.eCoin.verify();
+        });
+
+        //操作及验证
+        $("#submit").click(function () {
+            $(".data_error").hide();
+            var isOk = true;
+            var obj = {};
+            for(var k in from){
+                if(from[k] && typeof(from[k]) == "object" && "verify" in from[k]) {
+                    isOk = !from[k].verify ? isOk : (!from[k].verify() ? false : isOk);//验证
+                }
+                obj[k] = from[k].val ? from[k].val() : from[k];
+            }
+            if(isOk){
+                var url = webIP + "/api/rule/v0.1/rule";
+                ajax = new Ajax(url);
+                ajax.data = obj;
+                ajax.meth = "POST";
+                ajax.title = "提交充值规则";
+                ajax.do(submitResult);
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //错误提示
+        function dataError(obj, msg) {
+            obj = obj.parents(".data");
+            if (!obj.attr("errorMsg")) obj.attr("errorMsg", msg);
+            if (!msg) msg = obj.attr("errorMsg");
+            obj.find(".data_error").html(msg);
+            obj.find(".data_error").show();
+        }
+        //提交后结果
+        function submitResult(res,title){
+            if(res && (res.result || res.id || res.dataId)){
+                alertx("<div style='color:#ff0000;font-weight:bold;'>" + title + "成功</div>",function(){
+                    back(-1);
+                });
+            }else{
+                var msg = "<div style='color:#ff0000;font-weight:bold;'>" + title + "失败</div>";
+                if(res && res.errorMsg){
+                    msg += res.errorMsg;
+                }else{
+                    msg += "服务器错误";
+                }
+                alertx(msg);
+            }
+        }
+    }
+</script>

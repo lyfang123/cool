@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+     http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+
+    <!-- 打开注解 -->
+    <context:annotation-config/>
+    <!-- 以 base-package 开始的包注解才可以被spring处理 -->
+    <context:component-scan
+            base-package="com.uwaytech.**"/>
+    <!-- enable transaction demarcation with annotations -->
+    <tx:annotation-driven/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <!--<cache:annotation-driven key-generator="keyGeneratorService" mode="proxy" order="1" cache-manager="cacheManager"/>-->
+
+    <!-- cacheManager工厂类，指定ehcache.xml的位置 -->
+    <!--<bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"-->
+          <!--p:configLocation="classpath:spring-ehcache.xml"/>-->
+
+    <!--<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"-->
+          <!--p:cacheManager-ref="cacheManagerFactory"/>-->
+
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+        <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
+        <property name="validationMessageSource" ref="messageSource"/>
+    </bean>
+    <!-- 参数级别检验 -->
+    <bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+
+    <util:properties id="properties" location="classpath:/env-config.properties"/>
+
+    <!-- 在XML配置文件中加入外部属性文件，当然也可以指定外部文件的编码 -->
+    <bean id="propertyConfigurer" class="com.uwaytech.common.utils.PropertiesProvider">
+        <property name="locations">
+            <list>
+                <value>classpath:c3p0-config.properties</value>
+                <value>classpath:env-config.properties</value>
+                <!--<value>classpath:/configs/${web_env}/redis.properties</value>-->
+                <!--<value>classpath:/configs/${web_env}/application.properties</value>-->
+            </list>
+        </property>
+    </bean>
+
+    <!-- 数据源配置 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${c3p0.url}" />
+        <property name="username" value="${c3p0.user}" />
+        <property name="password" value="${c3p0.password}" />
+        <property name="filters" value="stat" />
+        <property name="maxActive" value="20" />
+        <property name="initialSize" value="1" />
+        <property name="maxWait" value="60000" />
+        <property name="minIdle" value="1" />
+        <property name="timeBetweenEvictionRunsMillis" value="3000" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+    </bean>
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:advice transaction-manager="transactionManager" id="txAdvice">
+        <tx:attributes>
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="Exception" read-only="false"/>
+            <tx:method name="delete*" propagation="REQUIRED" rollback-for="Exception" read-only="false"/>
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception" read-only="false"/>
+            <tx:method name="import*" propagation="REQUIRED" rollback-for="Exception" read-only="false"/>
+            <tx:method name="rest*" propagation="REQUIRED" rollback-for="Exception" read-only="false"/>
+            <tx:method name="*" read-only="false"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 事务的切入点 -->
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.uwaytech..service..*.*(..))"/>
+    </aop:config>
+
+    <!-- define the SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath*:com/uwaytech/**/*Mapper.xml"/>
+        <property name="configLocation" value="classpath:spring/mybatis.xml"/>
+    </bean>
+
+    <!-- scan for mappers and let them be autowired -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.uwaytech.**.dao"/>
+    </bean>
+
+
+    <!-- Spring mvc 异常处理 -->
+    <bean id="webExceptionResolver" class="com.uwaytech.common.exception.resolver.UnifiedControllerExceptionResolver"/>
+
+
+    <mvc:annotation-driven validator="validator" conversion-service="conversionService">
+        <!--<mvc:argument-resolvers>-->
+            <!--<bean class="com.uwaytech.test.ctrl.XObjArgumentResolver" />-->
+        <!--</mvc:argument-resolvers>-->
+        <mvc:message-converters register-defaults="true">
+            <bean
+                    class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>text/json;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <array>
+                        <!--NULL过滤-->
+                        <value>QuoteFieldNames</value>
+                        <value>WriteMapNullValue</value>
+                        <value>WriteNullStringAsEmpty</value>
+                        <value>WriteNullListAsEmpty</value>
+                        <value>WriteNullNumberAsZero</value>
+                        <value>WriteNullBooleanAsFalse</value>
+
+                        <!--时间格式-->
+                        <value>WriteDateUseDateFormat</value>
+
+                        <!--浏览器兼容-->
+                        <value>BrowserCompatible</value>
+                        <!--斜杠处理-->
+                        <value>WriteSlashAsSpecial</value>
+                    </array>
+
+                </property>
+
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="registerDefaultFormatters" value="false"/>
+        <property name="converters">
+            <set>
+                <bean class="com.uwaytech.common.enums.ByteEnumConvertorFactory"/>
+            </set>
+        </property>
+        <property name="formatters">
+            <set>
+                <bean class="org.springframework.format.number.NumberFormatAnnotationFormatterFactory"/>
+            </set>
+        </property>
+        <property name="formatterRegistrars">
+            <set>
+                <bean class="org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar">
+                    <property name="dateFormatter">
+                        <bean class="org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean">
+                            <property name="pattern" value="yyyy-MM-dd HH:mm:ss"/>
+                        </bean>
+                    </property>
+                </bean>
+            </set>
+        </property>
+    </bean>
+
+    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">-->
+        <!--<property name="customArgumentResolvers">-->
+            <!--<list>-->
+                <!--<bean class="com.uwaytech.test.ctrl.XObjArgumentResolver"/>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+    <bean class="com.uwaytech.httpclient.UserCenterSynProxy"/>
+
+    <!-- freemarker的配置 -->
+    <!--<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">-->
+        <!--<property name="templateLoaderPath" value="ftl"/>-->
+        <!--<property name="defaultEncoding" value="utf-8"/>-->
+    <!--</bean>-->
+
+    <mvc:interceptors>
+        <bean class="com.uwaytech.spring_interceptors.UCAuthInterceptor" />
+    </mvc:interceptors>
+
+    <!-- redis  config -->
+    <bean id="jedisFactory"
+          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <!--p:hostName="${redis.host}" p:port="${redis.port}" p:usePool="true"-->
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="usePool" value="true"/>
+        <property name="password" value="${redis.pass}"/>
+        <property name="database" value="${redis.default.db}"/>
+        <property name="timeout" value="${redis.timeout}"/>
+
+    </bean>
+    <bean id="redisTemplate"
+          class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory" ref="jedisFactory"/>
+        <!--<property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>-->
+    </bean>
+</beans>

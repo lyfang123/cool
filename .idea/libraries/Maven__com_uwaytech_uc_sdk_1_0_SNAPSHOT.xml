@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.uwaytech:uc-sdk:1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/uc-sdk/1.0-SNAPSHOT/uc-sdk-1.0-20160629.030044-72.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/uc-sdk/1.0-SNAPSHOT/uc-sdk-1.0-20160629.030044-72-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/uc-sdk/1.0-SNAPSHOT/uc-sdk-1.0-20160629.030044-72-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

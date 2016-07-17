@@ -1,0 +1,90 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="supplierId" class="input" type="text" placeholder="选择供应商"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+        </div>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+    #setTimes{
+        margin-left: 60px;
+    }
+    #setTimes span{
+        margin-left: 10px;
+        padding: 3px 9px;
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "供应商", EN: "name",Align:"center"},
+            {CH: "月份", EN: "date",Align:"center"},
+            {CH: "供应商应收e币", EN: "eCoin",Align:"center"},
+            {CH: "资源下载次数", EN: "downloadCount",Align:"center"},
+            {CH: "e币收入", EN: "eEarningAmount",Align:"center"},
+            {CH: "供应商分账比例", EN: "proportion",Align:"center"},
+            {CH: "e币兑换比例", EN: "eExchange",Align:"center"},
+            {CH: "供应商应收金额", EN: "rmbEarning",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/finance/v0.1/separate", option, config);
+        list.load(function () {});
+        var supplier = new AutoCompleInputSelect($("#supplierId"),webIP + "/api/supplier/v0.1/list",{pageSize: 10, pageNum: 1,name:'',key:"name"},"<div class='autoList' vaule='${supplierId}'>$has{supplierId}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span>${name}</span><span style='color:#ccc;display:block;'>地址:${address}</span></div>","supplierId","name");
+        //开始日期
+        var startTime = new Calendar($("#startTime"),"2016-07");
+        startTime.type = "month";
+        $("#startTime").val("");
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        endTime.type = "month";
+        $("#endTime").val("");
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        $("#downLoadExcel").click(function(){
+            list.toExcel("下载统计");
+        })
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endTime").val();
+            list.paramet.supplierId = supplier.val();
+            list.reLoad();
+        })
+    }
+</script>

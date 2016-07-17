@@ -1,0 +1,54 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "e币", EN: "eCoin", Align: "center"},
+            {CH: "人民币", EN: "rmb"}
+        ];
+        var list = new List(webIP + "/api/rule/v0.1/rule/list", option, config);
+        list.listNumTitle = "序号";
+        list.btns = "<span class=\"listDelete\">删除</span>";
+        list.checkBtn = false;
+        list.load(function () {
+            //删除
+           $(".listDelete").click(function(){
+               var id = JSON.parse($(this).parents("tr").attr("data")).id;
+               confirmx("确定要删除吗？",function(){
+                   var ajax = new Ajax(webIP + "/api/rule/v0.1/rule/" + id);
+                   ajax.data = {roleId:id};
+                   ajax.meth = "DELETE";
+                   ajax.loading.msg = "正在删除...";
+                   ajax.do(function(res){
+                       if(res && res.result){
+                            alertx("删除成功",function(){
+                                list.load();
+                            });
+                        }else{
+                            alertx("删除失败" + "<div style='color:#ff0000;'>" + res.errorMsg + "</div>");
+                        }
+                   });
+               })
+           })
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/admin/rule/ruleEdit.html",title:"新增e币兑换规则"});
+        })
+        $("#downLoadExcel").click(function(){
+            list.toExcel("e币兑换规则");
+        })
+    }
+</script>

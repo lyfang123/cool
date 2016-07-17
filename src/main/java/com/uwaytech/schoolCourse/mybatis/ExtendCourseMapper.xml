@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uwaytech.schoolCourse.dao.ExtendCourseMapper">
+
+  <resultMap id="SchoolCourse" type="com.uwaytech.schoolCourse.domain.CourseInfo">
+    <result column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="img_url" property="imgUrl" />
+    <result column="end_time" property="endTime" />
+    <result column="type" property="type" />
+    <result column="description" property="description" />
+    <association column="category_id" property="category"  select="cusCategoryList"/>
+    <association column="id" property="material" select="findMaterial" />
+    <association property="chapter" column="id" select="findChapter" />
+    <association column="id" property="resource" select="findResource" />
+  </resultMap>
+
+  <resultMap id="SupplierCourse" type="com.uwaytech.schoolCourse.domain.CourseInfo">
+    <result column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="img_url" property="imgUrl" />
+    <result column="end_time" property="endTime" />
+    <result column="description" property="description" />
+    <association column="category_id" property="category"  select="categoryList"/>
+    <association column="id" property="material" select="findMaterial" />
+    <association property="chapter" column="id" select="findChapter" />
+    <association column="id" property="resource" select="findResource" />
+  </resultMap>
+
+  <resultMap id="Category" type="com.uwaytech.schoolCourse.domain.CourseCategory">
+    <result property="id" column="id" />
+    <result property="name" column="name" />
+  </resultMap>
+
+  <resultMap id="CourseMaterial" type="com.uwaytech.schoolCourse.domain.MaterialEntity">
+    <result property="dataId" column="id" />
+    <result property="materialId" column="material_id" />
+    <result property="name" column="name" />
+    <result property="type" column="type" />
+    <result property="chapter" column="chapter" />
+    <result property="title" column="title" />
+  </resultMap>
+
+  <resultMap id="SupplierCourseList" type="com.uwaytech.schoolCourse.domain.CourseDetail">
+    <result property="courseId" column="id" />
+    <result property="name" column="name" />
+    <result property="category" column="category" />
+    <result property="imgUrl" column="img_url" />
+    <result property="createTime" column="create_time" />
+    <result property="endTime" column="end_time" />
+    <result property="status" column="status" />
+    <result property="checkStatus" column="check_status" />
+    <result property="reason" column="reason" />
+    <result property="description" column="description"  />
+  </resultMap>
+
+  <resultMap id="SchoolCourseList" type="com.uwaytech.schoolCourse.domain.CourseDetail">
+    <result property="courseId" column="id" />
+    <result property="name" column="name" />
+    <result property="category" column="category" />
+    <result property="imgUrl" column="img_url" />
+    <result property="createTime" column="create_time" />
+    <result property="endTime" column="end_time" />
+    <result property="status" column="status" />
+    <result property="type" column="type" />
+    <result property="description" column="description"  />
+    <result property="recommend" column="recommend" />
+  </resultMap>
+
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, grouping, name, category_id, e_coin, type, media_type, use_type, img_url, check_status, 
+    status, reason, description, create_time
+  </sql>
+
+  <insert id="insertCourseMaterial" parameterType="java.util.List">
+     INSERT INTO course_material (course_id,material_id,type,chapter,title,name) VALUES
+     <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.courseId},#{item.materialId},#{item.type},#{item.chapter},#{item.title},#{item.name})
+     </foreach>
+  </insert>
+
+  <insert id="insertResourceMaterial" parameterType="java.util.List">
+    INSERT INTO course_material (course_id,material_id,type,chapter,title) VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.courseId},#{item.materialId},#{item.type},#{item.chapter},#{item.title})
+    </foreach>
+  </insert>
+
+  <delete id="deleteCourseMaterial" parameterType="java.lang.Long">
+    DELETE FROM course_material
+    WHERE course_id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <select id="findSchoolCourseDetail" parameterType="java.lang.Long" resultMap="SchoolCourse">
+    SELECT t.id,t.name,t.category_id,t.description,t.end_time,t.img_url,t.type
+    FROM school_course t
+    LEFT JOIN customer_category tt ON tt.id = t.category_id
+    WHERE t.id = #{courseId}
+  </select>
+
+  <select id="findSupplierCourseDetail" parameterType="java.lang.Long" resultMap="SupplierCourse">
+    SELECT t.id,t.name,t.category_id,t.description,t.end_time,t.img_url
+    FROM supplier_course t
+    LEFT JOIN category tt ON tt.id = t.category_id
+    WHERE t.id = #{courseId}
+  </select>
+
+  <select id="findMaterial" parameterType="java.lang.Long" resultMap="CourseMaterial">
+    SELECT t.id,t.material_id,t.type,t.name,t.chapter,t.title FROM course_material t
+    WHERE t.course_id = #{value}
+  </select>
+
+  <select id="findChapter" parameterType="java.lang.Long" resultType="com.uwaytech.schoolCourse.domain.ChapterInfo">
+    SELECT DISTINCT t.chapter FROM course_material t
+    WHERE t.course_id = #{value} AND t.type = 2
+    ORDER BY t.chapter ASC
+  </select>
+
+  <select id="findResource" parameterType="java.lang.Long" resultType="com.uwaytech.schoolCourse.domain.ChapterInfo">
+    SELECT DISTINCT t.chapter FROM course_material t
+    WHERE t.course_id = #{value} AND t.type = 1
+    ORDER BY t.chapter ASC
+  </select>
+
+  <select id="findSupplierCourseList" resultMap="SupplierCourseList">
+    SELECT t.id,t.name,t.img_url,tt.name AS category,t.recommend,
+    t.create_time,t.end_time,t.status,t.check_status,t.description,t.reason
+    FROM supplier_course t
+    LEFT JOIN category tt ON tt.id = t.category_id
+    WHERE t.status != -1
+    <if test="id != null">
+      AND t.supplier_id = #{id}
+    </if>
+    <if test="name != null">
+      AND t.name LIKE CONCAT('%',#{name},'%')
+    </if>
+    <if test="categoryId != null">
+      AND t.category_id = #{categoryId}
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="checkStatus != null">
+      AND t.check_status = #{checkStatus}
+    </if>
+    <if test="startTime != null">
+      AND t.create_time &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND t.create_time &lt;=  #{endTime}
+    </if>
+  </select>
+
+  <select id="findSchoolCourseList" resultMap="SchoolCourseList">
+    SELECT t.id,t.name,t.img_url,tt.name AS category,t.recommend,
+    t.create_time,t.end_time,t.status,t.description,t.type
+    FROM school_course t
+    LEFT JOIN customer_category tt ON tt.id = t.category_id
+    WHERE t.status != -1
+    <if test="id != null">
+      AND t.school_id = #{id}
+    </if>
+    <if test="name != null">
+      AND t.name LIKE CONCAT('%',#{name},'%')
+    </if>
+    <if test="categoryId != null">
+      AND t.category_id = #{categoryId}
+    </if>
+    <if test="type != null">
+      <if test="type != 0">
+        AND t.type = #{type}
+      </if>
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="startTime != null">
+      AND t.create_time &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND t.create_time &lt;=  #{endTime}
+    </if>
+  </select>
+
+  <update id="updateSupplierViewNum" parameterType="java.lang.Long">
+    UPDATE supplier_course SET view_num = view_num +1 WHERE id =#{courseId}
+  </update>
+
+  <update id="updateSchoolViewNum" parameterType="java.lang.Long">
+    UPDATE school_course SET view_num = view_num +1 WHERE id =#{courseId}
+  </update>
+
+  <update id="updateMaterials" parameterType="java.util.List">
+    UPDATE material SET status = 2 WHERE id IN
+    <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+      #{item.id}
+    </foreach>
+  </update>
+
+  <select id="categoryList" parameterType="java.lang.Long" resultMap="Category">
+    SELECT t4.id,t4.name FROM category t4 WHERE t4.id =(SELECT t2.parent_id FROM category t2
+    LEFT JOIN category t3 ON t3.parent_id = t2.id WHERE t3.id = #{value})
+    UNION  SELECT t.id,t.name FROM category t LEFT JOIN category t1 ON t1.parent_id = t.id
+    WHERE t1.id = #{value}
+    UNION SELECT tt.id,tt.name FROM category tt WHERE tt.id = #{value}
+  </select>
+
+  <select id="cusCategoryList" parameterType="java.lang.Long" resultMap="Category">
+    SELECT t4.id,t4.name FROM customer_category t4 WHERE t4.id =(SELECT t2.parent_id
+    FROM customer_category t2 LEFT JOIN customer_category t3 ON t3.parent_id = t2.id WHERE t3.id = #{value})
+    UNION SELECT t.id,t.name FROM customer_category t LEFT JOIN customer_category t1 ON t1.parent_id = t.id
+    WHERE t1.id = #{value}
+    UNION SELECT tt.id,tt.name FROM customer_category tt WHERE tt.id = #{value}
+  </select>
+
+  <select id="findSchoolCourseListByKeyword" resultMap="SchoolCourseList">
+    SELECT tt.id,tt.name,tt.img_url,tt.recommend,tt.create_time,tt.end_time,
+    tt.status,tt.description,ts.name AS category FROM school_course tt
+    LEFT JOIN customer_category ts ON tt.category_id = ts.id WHERE tt.status != -1 AND tt.school_id = #{id}
+    AND (tt.name LIKE CONCAT('%',#{name},'%') OR tt.category_id IN (select t.id
+    from customer_category t where t.name like CONCAT('%',#{name},'%')
+    OR tt.category_id IN (
+    select
+    (select t1.id  from customer_category t1 where t1.parent_id = t2.id ) as id
+    from customer_category t2 where t2.name like CONCAT('%',#{name},'%'))
+    OR tt.category_id IN (
+    select
+    (select t3.id from customer_category t3 where t3.parent_id in(select t5.id from customer_category t5
+    where t5.parent_id = t4.id)) as id
+    from customer_category t4 where t4.name like CONCAT('%',#{name},'%'))))
+    <if test="type != null">
+      <if test="type != 0">
+        AND tt.type = #{type}
+      </if>
+    </if>
+  </select>
+
+  <select id="findSupplierCourseListByKeyword"  resultMap="SupplierCourseList">
+    SELECT tt.id,tt.name,tt.img_url,tt.check_status,tt.create_time,tt.end_time,tt.recommend,tt.reason,
+    tt.status,tt.description,tt.type,ts.name AS category FROM supplier_course tt
+    LEFT JOIN category ts ON tt.category_id = ts.id WHERE tt.status != -1 AND tt.check_status = 1
+    <if test="id != null">
+      AND tt.supplier_id = #{id}
+    </if>
+    AND (tt.name LIKE CONCAT('%',#{name},'%') OR tt.category_id IN (select t.id
+    from category t where t.name like CONCAT('%',#{name},'%')
+    OR tt.category_id IN (
+    select
+    (select t1.id  from customer_category t1 where t1.parent_id = t2.id ) as id
+    from category t2 where t2.name like CONCAT('%',#{name},'%'))
+    OR tt.category_id IN (
+    select
+    (select t3.id from category t3 where t3.parent_id in(select t5.id from category t5
+    where t5.parent_id = t4.id)) as id
+    from category t4 where t4.name like CONCAT('%',#{name},'%'))))
+  </select>
+</mapper>

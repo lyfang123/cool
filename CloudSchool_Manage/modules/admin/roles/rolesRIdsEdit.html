@@ -1,0 +1,103 @@
+﻿<form class="form">
+    <div class="data width100">
+        <div class="data_title" style="border-bottom: 1px dashed #e4e4e4">权限配置</div>
+        <div id="data-rIds"></div>
+    </div>
+    <div class="clear"></div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<style type="text/css">
+    .tree{
+        margin: 10px 20px;
+        border:1px solid #e4e4e4;
+    }
+    .nodeData{
+        border-bottom:1px dashed #e4e4e4;
+        padding: 5px 0px;
+    }
+    .nodeData:hover{
+        background: #f9f9f9;
+    }
+    .lastNode .nodeData{
+        border:none; 
+    }
+</style>
+<script>
+    function load() {
+        function menuTree(obj){
+            var menuTree = new Tree(obj,null,"id","children","<div class='nodeData'><input type='checkbox' data-id='${id}' ${checked} />${title}</div>",function(){
+                obj.click(function(e){
+                    if(e.target.nodeName == "INPUT"){
+                        if(e.target.checked){
+                            if($(e.target).parent().parent().parent().prev().find("input").size() != 0)
+                                $(e.target).parent().parent().parent().prev().find("input")[0].checked = true;
+                            $(e.target).parent().next().find("input").each(function(i){
+                                $(this)[0].checked = true;
+                            })
+                        }else{
+                            $(e.target).parent().next().find("input").each(function(i){
+                                $(this)[0].checked = false;
+                            })
+                        }
+                    }
+                })
+            });
+            menuTree.val = function(s){
+                if(s){
+                    this.html(s);
+                }else{
+                    var rIds = "";
+                    var isFirst = false;
+                    obj.find("input").each(function(i){
+                        if($(this)[0].checked) {
+                            if(!isFirst){
+                                rIds += $(this).attr("data-id");
+                                isFirst = true;
+                            }else{
+                                rIds += "," + $(this).attr("data-id");
+                            }
+                        }
+                    })
+                    return rIds;
+                }
+            }
+            return menuTree;
+        }
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var rIds = menuTree($("#data-rIds"));
+        var groupId = getUrlParam("id");
+        var _rIds;
+        var ajax = new Ajax(webIP + "/api/security/v0.1/groups/" + groupId + "/details");
+        ajax.do(function(res){
+            if(res){
+                _rIds = res;
+                rIds.val(res);
+            }
+        })
+
+        //操作及验证
+        $("#submit").click(function () {
+            if(_rIds && _rIds != rIds.val()){
+                ajax = new Ajax(webIP + "/api/security/v0.1/groups/" + groupId + "?rIds=" + rIds.val());
+//                ajax.data = {rIds:rIds.val(),groupId:groupId};
+                ajax.meth = "PUT";
+                ajax.do(function(res){
+                    if(res && res.result){
+                        alertx("<div style='color:#ff0000;font-weight:bold;'>权限配置成功</div>",function(){
+                            back(-1);
+                        });
+                    }else{
+                        alertx("<div style='color:#ff0000;font-weight:bold;'>权限配置失败!</div>");
+                    }
+                });
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+    }
+</script>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uwaytech.browsing.dao.BrowsingInfo">
+  <resultMap id="BaseResultMap" type="com.uwaytech.browsing.domain.BrowsingInfo">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="cell_id" jdbcType="BIGINT" property="cellId" />
+    <result column="point" jdbcType="VARCHAR" property="point" />
+    <result column="media_type" jdbcType="INTEGER" property="mediaType" />
+    <result column="name" jdbcType="VARCHAR" property="name"/>
+    <result column="image_url" jdbcType="VARCHAR" property="imageUrl"/>
+    <result column="category_id" jdbcType="BIGINT" property="categoryId"/>
+    <result column="description" jdbcType="VARCHAR" property="description"/>
+  </resultMap>
+
+  <select id="selectBrowsingInfo" parameterType="java.util.Map" resultMap="BaseResultMap" resultType="com.uwaytech.browsing.domain.BrowsingInfo">
+      <choose>
+        <when test="type==2">
+            SELECT browsing.*,course.name,course.img_url,course.category_id,course.description FROM browsing JOIN course ON cell_id = course.id
+            WHERE user_id=#{userId} AND course.status=1 AND browsing.type=#{type} AND browsing.browse_time BETWEEN #{startTime} AND #{endTime}
+        </when>
+        <when test="type==1">
+          SELECT browsing.*,course.name,resource.img_url,resource.category_id,resource.description FROM browsing JOIN resource ON cell_id = resource.id
+          WHERE user_id=#{userId} AND resource.status=1 AND browsing.type=#{type} AND browsing.browse_time BETWEEN #{startTime} AND #{endTime}
+        </when>
+      </choose>
+  </select>
+</mapper>

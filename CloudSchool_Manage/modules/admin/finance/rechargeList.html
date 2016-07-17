@@ -1,0 +1,109 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="schoolId" class="input" type="text" placeholder="选择学校"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+            <span id="setTimes">最近:<span months="1">1个月</span><span months="3">3个月</span><span months="12">1年</span></span>
+        </div>
+        <input type="button" value="+ 充值" id="addBtn" class="bg_00b7ee"/>
+        e币总计：<b id="eAmount" style="font-size: 24px;color: #388fef;margin-right: 5px;">0</b>个
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+    #setTimes{
+        margin-left: 60px;
+    }
+    #setTimes span{
+        margin-left: 10px;
+        padding: 3px 9px;
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "入账单号", EN: "orderCode", Align: "center"},
+            {CH: "银行流水", EN: "bankNumber"},
+            {CH: "支付类型", EN: "payType",Align:"center"},
+            {CH: "收入人民币", EN: "money",Align:"center"},
+            {CH: "收入e币", EN: "eCoin",Align:"center"},
+            {CH: "入账时间", EN: "dealDate",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/finance/v0.1/recharge/list", option, config);
+        list.listNumTitle = "序号";
+        list.checkBtn = false;
+        list.load(function () {
+            $("#eAmount").html(list.data.eAmount);
+        });
+        var school = new AutoCompleInputSelect($("#schoolId"),webIP + "/api/finance/v0.1/school/list",{pageSize: 10, pageNum: 1,name:'',key:"name"},"<div class='autoList' vaule='${schoolId}'>$has{schoolId}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span>${name}</span><span style='color:#ccc;display:block;'>已消费:${eBalance}</span></div>","schoolId","name");
+        $("#downLoadExcel").click(function(){
+            list.toExcel("学校消费信息");
+        })
+        //开始日期
+        var startTime = new Calendar($("#startTime"));
+        $("#startTime").val("");
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        $("#endTime").val("");
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/admin/finance/rechargeEdit.html",title:"充值"});
+        })
+        var setTimesActive;
+        $("#setTimes span").each(function(i){
+            $(this).click(function(){
+                if(setTimesActive) setTimesActive.css({color:"#666666"});
+                setTimesActive = $(this);
+                setTimesActive.css({color:"#3ec0ef"});
+                var months = $(this).attr("months");
+                var _endTime = new Date();
+                var _startTime = new Date();
+                _startTime.setMonth(_endTime.getMonth() - months);
+                startTime.selectedDate = _startTime;
+                $("#startTime").val(startTime.toString());
+                endTime.selectedDate = _endTime;
+                $("#endTime").val(endTime.toString());
+            })
+        })
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            list.paramet.schoolId = school.val();
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endTime").val();
+            list.reLoad();
+        })
+    }
+</script>

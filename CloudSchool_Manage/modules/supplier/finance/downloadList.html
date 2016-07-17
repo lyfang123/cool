@@ -1,0 +1,102 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="resourceName" class="input" type="text" placeholder="资源名称"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+            <span id="setTimes">最近:<span months="1">1个月</span><span months="3">3个月</span><span months="12">1年</span></span>
+        </div>
+        e币收入总计：<b id="eAmount" style="font-size: 24px;color: #388fef;margin-right: 5px;">0</b>个
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+    #setTimes{
+        margin-left: 60px;
+    }
+    #setTimes span{
+        margin-left: 10px;
+        padding: 3px 9px;
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "资源名称", EN: "name",Align:"center"},
+            {CH: "下载数量", EN: "downloadCount",Align:"center"},
+            {CH: "对应e币", EN: "eCoin",Align:"center"},
+            {CH: "e币收入", EN: "eCoins",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/supplier/v0.1/download/statistics", option, config);
+        list.load(function () {
+            $("#eAmount").html(list.data.eAmount);
+        });
+        //开始日期
+        var startTime = new Calendar($("#startTime"));
+        $("#startTime").val("");
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        $("#endTime").val("");
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        $("#downLoadExcel").click(function(){
+            list.toExcel("下载统计");
+        })
+        var setTimesActive;
+        $("#setTimes span").each(function(i){
+            $(this).click(function(){
+                if(setTimesActive) setTimesActive.css({color:"#666666"});
+                setTimesActive = $(this);
+                setTimesActive.css({color:"#3ec0ef"});
+                var months = $(this).attr("months");
+                var _endTime = new Date();
+                var _startTime = new Date();
+                _startTime.setMonth(_endTime.getMonth() - months);
+                startTime.selectedDate = _startTime;
+                $("#startTime").val(startTime.toString());
+                endTime.selectedDate = _endTime;
+                $("#endTime").val(endTime.toString());
+            })
+        })
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endTime").val();
+            list.paramet.resourceName = $("#resourceName").val();
+            list.reLoad();
+        })
+    }
+</script>

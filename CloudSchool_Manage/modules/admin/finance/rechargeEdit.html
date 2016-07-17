@@ -1,0 +1,157 @@
+﻿<form class="form">
+    <div class="form_title"><b>供应商基本信息</b><span class="red">(*为必填项)</span></div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>学校</div>
+        <span class="data_error">学校不能为空</span><input class="input" id="data-schoolId" type="text" placeholder="请选择学校"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>入账单号</div>
+        <span class="data_error">入账单号不能为空</span><input class="input" id="data-orderCode" type="text" placeholder="请填写入账单号"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>银行流水号</div>
+        <span class="data_error">银行流水号不能为空</span><input class="input" id="data-bankNumber" type="text" placeholder="请填写银行流水号"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>入账方式</div>
+        <span class="data_error">入账方式不能为空</span>
+        <select class="input" id="data-payType">
+            <option value="1" selected>转账</option>
+            <option value="2">现金</option>
+            <option value="3">支付宝</option>
+            <option value="4">微信</option>
+            <option value="5">其他</option>
+        </select>
+    </div>
+    <div class="clear"></div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>金额（元）</div>
+        <span class="data_error">金额不能为空</span><input class="input" id="data-money" type="text" placeholder="选择金额"/>
+    </div>
+    <div class="data width50">
+        <div class="data_title"><span class="red">*</span>e币个数</div>
+        <span class="data_error">e币不能为空</span><input class="input" id="data-eCoin" type="text" placeholder="" readonly="true" />
+    </div>
+    <div class="clear"></div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<script>
+    function load() {
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            id : getUrlParam("id"),
+            schoolId : new AutoCompleInputSelect($("#data-schoolId"),webIP + "/api/finance/v0.1/school/list",{pageSize: 10, pageNum: 1,name:'',key:"name"},"<div class='autoList' vaule='${schoolId}'>$has{schoolId}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span>${name}</span><span style='color:#ccc;display:block;'>已消费:${eBalance}</span></div>","schoolId","name"),
+            orderCode : $("#data-orderCode"),
+            bankNumber : $("#data-bankNumber"),
+            payType : $("#data-payType"),
+            money : $("#data-money"),
+            eCoin : $("#data-eCoin")
+        }
+        var money = new AutoCompleInputSelect($("#data-money"),webIP + "/api/rule/v0.1/rule/list",{pageSize: 10, pageNum: 1},"<div class='autoList' vaule='${ruleId}'>$has{ruleId}<b class='listStyle_cicle icon_img'>￥</b><span>金额:${rmb}(元)</span><span style='color:#ccc;display:block;'>e币:${eCoin}(个)</span></div>","ruleId","rmb",function(res){
+                if(res && res[0].eCoin) $("#data-eCoin").val(res[0].eCoin);
+            });
+        //单号验证方法
+        from.orderCode.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "入账单号不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.orderCode.blur(function () {
+            from.orderCode.verify();
+        });
+
+        //流水号验证方法
+        from.bankNumber.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "银行流水不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        from.bankNumber.blur(function () {
+            from.bankNumber.verify();
+        });
+
+        //人民币验证方法
+        from.money.verify = function(){
+            var v = this.val();
+            if (/\d/.test(v) && v >= 0) {
+                return true;
+            } else {
+                dataError(this, "充值金额必须大于等于0");
+                return false;
+            }
+        };
+        
+        //e币验证方法
+        from.eCoin.verify = function(){
+            var v = this.val();
+            if (/\d/.test(v) && v >= 0) {
+                return true;
+            } else {
+                dataError(this, "e币个数必须大于等于0");
+                return false;
+            }
+        };
+
+        //操作及验证
+        $("#submit").click(function () {
+            $(".data_error").hide();
+            var isOk = true;
+            var data = {};
+            for(var k in from){
+                if(from[k] && typeof(from[k]) == "object" && "verify" in from[k]) {
+                    isOk = !from[k].verify ? isOk : (!from[k].verify() ? false : isOk);//验证
+                }
+                data[k] = from[k].val ? from[k].val() : from[k];
+            }
+            if(isOk){
+                var url = webIP + "/api/finance/v0.1/recharge";
+                ajax = new Ajax(url);
+                //ajax.data = JSON.stringify(data);
+                ajax.data = data;
+                //ajax.header.push({key:"Content-Type",vaule:"application/json"});
+                ajax.meth = from.id ? "PUT" : "POST";
+                ajax.title = "充值";
+                ajax.do(submitResult);
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //错误提示
+        function dataError(obj, msg) {
+            obj = obj.parents(".data");
+            if (!obj.attr("errorMsg")) obj.attr("errorMsg", msg);
+            if (!msg) msg = obj.attr("errorMsg");
+            obj.find(".data_error").html(msg);
+            obj.find(".data_error").show();
+        }
+        //提交后结果
+        function submitResult(res,title){
+            if(res && (res.result || res.id || res.dataId)){
+                alertx("<div style='color:#ff0000;font-weight:bold;'>" + title + "成功</div>",function(){
+                    back(-1);
+                });
+            }else{
+                var msg = "<div style='color:#ff0000;font-weight:bold;'>" + title + "失败</div>";
+                if(res && res.errorMsg){
+                    msg += res.errorMsg;
+                }else{
+                    msg += "服务器错误";
+                }
+                alertx(msg);
+            }
+        }
+    }
+</script>

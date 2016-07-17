@@ -1,0 +1,168 @@
+﻿.list_header{
+    padding:10px 0px;
+}
+.list_btns{
+    text-align: right;
+}
+.list_btns span{
+    padding: 10px 50px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.list_line{
+    height: 1px;
+    border-bottom: 1px dashed #e4e4e4;
+}
+.table{
+    margin-top: 2px;
+}
+.table tr:hover{
+    background: #f7f7f7;
+}
+.table th{
+    padding: 10px;
+    background: #eaeaea;
+    font-weight: normal;
+}
+.table td{
+    padding: 10px;
+    border-bottom: 1px solid #f3f3f3;
+}
+.tdBtns span{
+    margin-right: 5px;
+    cursor: pointer;
+}
+.list_footer{
+    margin-top: 10px;
+    padding-bottom:10px; 
+}
+#pagaBtns{
+    margin-top: 20px;
+    text-align: right;
+    padding-bottom: 10px;
+}
+.pagaBtn{
+    padding: 3px 9px;
+    border-left: 1px solid #f0efef;
+    border-top: 1px solid #f0efef;
+    border-bottom: 1px solid #f0efef;
+    cursor: pointer;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
+}
+.pagaBtn:hover{
+    background: #f8f8f8;
+}
+.pagaBtnFirst{
+}
+.pagaBtnLast{
+    border-right: 1px solid #f0efef;
+}
+.pagaBtnActive{
+    background: #19b0e0;
+    color: #fff;
+    border-color: #19b0e0;
+}
+.pagaBtnActive:hover{
+    background: #19b0e0;
+    color: #fff;
+    border-color: #19b0e0;
+}
+.listEdit{
+    background: url("../images/icon_edit.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+}
+.listEdit:hover{
+    background: url("../images/icon_edit_active.png") center center no-repeat;
+}
+.listDelete{
+    background: url("../images/icon_delete.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+}
+.listDelete:hover{
+    background: url("../images/icon_delete_active.png") center center no-repeat;
+}
+.listChange{
+    background: url("../images/icon_change.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+}
+.listChange:hover{
+    background: url("../images/icon_change_active.png") center center no-repeat;
+}
+.listModulesEdit{
+    background: url("../images/icon_listModules.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+    cursor: pointer;
+}
+.listModulesEdit:hover{
+    background: url("../images/icon_listModules_active.png") center center no-repeat;
+}
+.listUsers{
+    background: url("../images/icon_user.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+}
+.listUsers:hover{
+    background: url("../images/icon_user_active.png") center center no-repeat;
+}
+
+.listLook{
+    background: url("../images/can1.png") center center no-repeat;
+    width: 16px;
+    height: 16px;
+    border: none;
+    color: rgba(255,255,255,0);
+    overflow: hidden;
+}
+.listLook:hover{
+    background: url("../images/can.png") center center no-repeat;
+}
+.list_header_form{
+    text-align: right;
+}
+.list_header_form input[type='button']{
+    padding:10px 20px; 
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+}
+.search{
+    float: left;
+    margin-right: 10px;
+}
+
+.showReason{
+    color:#ff4707;
+}
+
+.showReason font{
+    padding:1px 6px; 
+    border:1px solid #e4e4e4;
+    border-radius:2px;
+    background:#fff;
+    color:#4ebce4;
+    cursor:pointer
+}

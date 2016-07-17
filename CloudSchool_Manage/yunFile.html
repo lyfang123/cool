@@ -1,0 +1,1027 @@
+<div id="yunFile">
+    <div class="yunFileLeft">
+        <div id="yunPath">
+            <div class="yunPath" objectId="0" style="border: none;">
+                <div class="yunPathSrc yunPathActive yunPathOpen">
+                    <div class="yunPathName">个人云盘</div>
+                </div>
+            </div>
+            <div class="yunPath" objectId="1" style="border: none;">
+                <div class="yunPathSrc yunPathSrcShare">
+                    <div class="yunPathName">我的共享</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="yunFileRight">
+        <div class="yunFilesBtn unSelect"><span id="NowFileName"></span><span id="editFileBtn" class="bg_00b7ee"><img src="images/icon_yun_edit.png" />编辑</span><span id="addFileBtn" class="bg_00b7ee"><img src="images/icon_yun_add.png" />新建文件夹</span><span
+                id="upLoadFileBtn" class="bg_00b7ee"><img src="images/icon_yun_upload.png" />上传本地文件</span></div>
+        <div id="yunFiles">
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+<script>
+    function load() {
+        //绑定事件
+        var activePath = null;
+        var activeFile = null;
+        var mouseDownTime = null;
+        $("#addFileBtn").click(function () {//新建文件夹按钮
+            if(editing) {
+                alertx("请先退出编辑状态");
+                return false;
+            }
+            addFile();
+        })
+        $("#upLoadFileBtn").click(function () {//上传本地文件按钮
+            if(editing) {
+                alertx("请先退出编辑状态");
+                return false;
+            }
+            upLoadLocalFile();
+        })
+        var editing = false;
+        $("#editFileBtn").click(function(){//编辑按钮
+            Contextmenu.closeAll();
+            Contextmenu.list = [];
+            if(!editing){
+                $(this).html("<img src=\"images/icon_yun_edit.png\" />退出编辑");
+                $(this).css({backgroundColor:'#f11c1c',borderColor:'#f11c1c'});
+                $(".yunFiles").each(function(){
+                    var type = $(this).attr("type");
+                    if(type.indexOf("file") == -1){
+                        $(this).addClass("editActive");
+                        $(this).html("<div class='checkbox'>■</div>" + $(this).html());
+                    }
+                })
+                $(".checkbox").click(function(){
+                    if($(this).hasClass("checked")){
+                        $(this).removeClass("checked");
+                    }else{
+                        $(this).addClass("checked");
+                    }
+                })
+                //全选
+                Contextmenu.list.push({
+                    text: "<div id='allChecked'><img src='images/icon_yun_all.png' title='全选' /><div>全选</div></div>", fn: function () {
+                        $(".checkbox").addClass("checked");
+                        $("#allUnChecked").parent().show();
+                        $("#allChecked").parent().hide();
+                    }
+                });
+                //反选
+                Contextmenu.list.push({
+                    text: "<div id='allUnChecked'><img src='images/icon_yun_all.png' title='反选' /><div>反选</div></div>", fn: function () {
+                        $(".checked").removeClass("checked");
+                        $("#allUnChecked").parent().hide();
+                        $("#allChecked").parent().show();
+                    }
+                });
+                //共享
+                Contextmenu.list.push({
+                    text: "<div id='checkedShare'><img src='images/icon_yun_share.png' title='共享' /><div>共享</div></div>", fn: function () {
+                        if($(".checked").size() == 0){
+                            alertx("请先选择需要共享的文件");
+                            return false;
+                        }
+                        $("#checkedUnShare").parent().show();
+                            $("#checkedShare").parent().hide();
+                        var ids = [];
+                        $(".checked").each(function(){
+                            if($(this).parent().attr("type").indexOf("_share") == -1){
+                                ids.push($(this).parent().attr("objectid"));
+                            }
+                        })
+                        if(ids.length > 0) {
+                            editFileShare(ids,true);
+                        }
+                    }
+                });
+                //取消共享
+                Contextmenu.list.push({
+                    text: "<div id='checkedUnShare'><img src='images/icon_yun_share.png' title='取消共享' /><div>取消共享</div></div>", fn: function () {
+                        var ids = [];
+                        if($(".checked").size() == 0){
+                            alertx("请先选择需要取消共享的文件");
+                            return false;
+                        }
+                        if(activeFileId != 1){
+                            $("#checkedUnShare").parent().hide();
+                            $("#checkedShare").parent().show();
+                        }
+                        $(".checked").each(function(){
+                            if($(this).parent().attr("type").indexOf("_share") > -1){
+                                ids.push($(this).parent().attr("objectid"));
+                            }
+                        })
+                        if(ids.length > 0) {
+                            editFileShare(ids,false);
+                        }
+                    }
+                });
+                //下载
+                Contextmenu.list.push({
+                    text: "<img src='images/icon_yun_download.png' title='下载' /><div>下载</div>", fn: function () {
+                        var url = yunIP + (activeFileId != 1 ? "/api/cs/v0.1/private/" : "/api/cs/v0.1/share/");
+                        if($(".checked").size() == 0){
+                            alertx("请先选择需要下载的文件");
+                            return false;
+                        }
+                        var start = 1;
+                        download(url + $(".checked").eq(0).parent().attr("objectid") + "?accessToken=" + accessToken);
+                        var t = setInterval(function(){
+                            download(url + $(".checked").eq(start).parent().attr("objectid") + "?accessToken=" + accessToken);
+                            start ++;
+                            if(start == $(".checked").size()) clearInterval(t);
+                        },1000)
+                    }
+                });
+                if(activeFileId != 1){
+                    //删除
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_delete.png' title='删除' /><div>删除</div>", fn: function () {
+                            var ids = [];
+                            $(".checked").each(function(){
+                                ids.push($(this).parent().attr("objectid"));
+                            })
+                            if(ids.length > 0) {
+                                deleteFile(ids);
+                            }else{
+                                alertx("请先选择需要删除的文件");
+                            }
+                        }
+                    });
+                }
+                Contextmenu.list.push({
+                    text: "<img src='images/icon_yun_close.png' title='取消' />", fn: function () {
+                        Contextmenu.close();
+                    }
+                });
+                Contextmenu.open(0, 0,true);
+                $("#allUnChecked").parent().hide();
+                if(activeFileId != 1){
+                    $("#checkedUnShare").parent().hide();
+                }else{
+                    $("#checkedShare").parent().hide();
+                }
+            }else{
+                $(this).html("<img src=\"images/icon_yun_edit.png\" />编辑");
+                $(this).removeAttr("style");
+                $(".checkbox").remove();
+                $(".editActive").removeClass("editActive");
+                Contextmenu.close();
+            }
+            editing = !editing;
+        })
+        if(!window.isBindYunFileKey){
+            $(window).bind("keyup",yunFileKey);
+            window.isBindYunFileKey = true;
+        }
+        function yunFileKey(e){
+            if(editing) {
+                return false;
+            }
+            if($("#yunFile").size() == 1){
+                switch(e.which){//删除操作
+                    case 46:
+                        if(activeFile && activeFileId != 1){
+                            deleteFile(activeFile.attr("objectid"));
+                            activeFile = null;
+                        }
+                        break;
+                    case 13:
+                        if(activeFile && activeFileId != 1){//打开文件夹
+                            if(activeFile.find("input").size() > 0){
+                                activeFile.find("input").eq(0).blur();
+                            }else{
+                                var objectId = activeFile.attr("objectId");
+                                var type = activeFile.attr("type");
+                                if (type.indexOf("file") > -1) {
+                                    if (Tree[objectId]) {
+                                        showRight(objectId);
+                                    } else {
+                                        ajaxFilePath({objectId: objectId}, function (res) {
+                                            showRight(objectId);
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        function bindRightEvent(){
+            $(".yunFiles").bind("click",function(e){
+                if(editing) {
+                    return false;
+                }
+                if(e.target.nodeName == "INPUT") return false;
+                var $this = $(this);
+
+                var file = $this;
+                if (activeFile) activeFile.removeClass("activeFilesActive");
+                activeFile = file;
+                activeFile.addClass("activeFilesActive");
+
+                Contextmenu.close();
+                mouseDownTime = new Date();
+                //原右键菜单
+                Contextmenu.list = [];
+                var type = $this.attr("type");
+                var objectId = $this.attr("objectId");
+                if(type.indexOf("_share") > -1){
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_share.png' title='取消共享' /><div>取消共享</div>", fn: function () {
+                            editFileShare(objectId, false);
+                        }
+                    });
+                }else if(type.indexOf("_share") == -1 && type != "file"){
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_share.png' title='共享' /><div>共享</div>", fn: function () {
+                            editFileShare(objectId, true);
+                        }
+                    });
+                }
+                if (type.indexOf("file") == -1) {
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_download.png' title='下载' /><div>下载</div>", fn: function () {
+                            ajaxFilePath({objectId: objectId}, function () {}, true);
+                        }
+                    });
+                }
+                if (type.indexOf("file") > -1) {
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_all.png' title='打开文件夹' /><div>打开</div>", fn: function () {
+                            openFile(objectId);
+                        }
+                    });
+                }
+                if(activeFileId != 1){
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_edit.png' title='重命名' /><div>重命名</div>", fn: function () {
+                            reName($this.find(".yunFilesName").eq(0),type,objectId);
+                        }
+                    });
+                    Contextmenu.list.push({
+                        text: "<img src='images/icon_yun_delete.png' title='删除' /><div>删除</div>", fn: function () {
+                            deleteFile(objectId);
+                        }
+                    });
+                }
+                Contextmenu.list.push({
+                    text: "<img src='images/icon_yun_close.png' title='取消' />", fn: function () {
+                    }
+                });
+                Contextmenu.open(e.pageX - $(window).scrollLeft(), e.pageY - $(window).scrollTop());
+            })
+        }
+        //双击打开文件夹
+        $("#yunFiles").dblclick(function(e){
+            if(editing) {
+                return false;
+            }
+            if(e.target.className.indexOf("yunFilesImg") > -1){
+                openFile($(e.target).parent().attr("objectid"));
+            }else if(e.target.className.indexOf("yunFilesName") > -1){
+                reName($(e.target),$(e.target).parent().attr("type"),$(e.target).parent().attr("objectid"));
+            }
+        })
+        //打开文件夹
+        function openFile(objectId){
+            var isFileType = false;
+            //左边
+            $(".yunPathActive").removeClass("yunPathActive");
+            $(".yunPath").each(function(){
+                if($(this).attr("objectid") == objectId){
+                    $(this).find(".yunPathSrc").eq(0).addClass("yunPathActive");
+                    activePath = $(this).find(".yunPathName").eq(0);
+                    isFileType = true;
+                    if(objectId != 1){
+                        activePath.parent().addClass("yunPathOpen");
+                    }
+                }
+            })
+            //右边
+            if(isFileType){
+                if (Tree[objectId]) {
+                    showRight(objectId);
+                } else {
+                    ajaxFilePath({objectId: objectId}, function (res) {
+                        showRight(objectId);
+                    })
+                }
+            }
+        }
+        //重命名
+        function reName(yunFilesName,type,objectId){
+            var nameNode = yunFilesName;
+            type = type.replace(/^(.+)(_share?)$/,"$1");
+            var name = nameNode.attr("title");
+            name = type == "file" ? name : name.replace(/^(.+)(\..+?)$/,"$1");
+            nameNode.html("<input class='changeName' style='text-align:center;width:95%' type='text' value='" + name + "' />");
+            $(".changeName").blur(function () {
+                var value = $(this).val();
+                if (value == "" || value == name) {
+                    showRight(activeFileId);
+                } else {
+                    value = value + (type == "file" ? "" : "." + type);
+                    editFile(objectId, value);
+                }
+            });
+            $(".changeName").keydown(function(e){
+                if(e.which == 13){
+                    $(this).blur();
+                }
+            })
+        }
+        //点击路径
+        $("#yunPath").bind("click",function(e){
+            if(editing) {
+                alertx("请先退出编辑状态");
+                return false;
+            }
+            if (e.target.className.indexOf("yunPathName") > -1) {//点击路径
+                //active
+                activePath = !activePath ? $(".yunPathName").eq(0) : activePath;
+                activePath.parent().removeClass("yunPathActive");
+                var _objectId = activePath.parent().parent().attr("objectId");
+                activePath = $(e.target);
+                activePath.parent().addClass("yunPathActive");
+
+                var objectId = $(e.target).parent().parent().attr("objectId");
+                //open
+                if(objectId != 1){
+                    if(objectId == _objectId && activePath.parent().hasClass("yunPathOpen")){
+                        activePath.parent().removeClass("yunPathOpen");
+                        activePath.parent().next().hide();
+                    }else{
+                        activePath.parent().addClass("yunPathOpen");
+                        activePath.parent().next().show();
+                    }
+                }
+                if (Tree[objectId]) {
+                    showRight(objectId);
+                } else {
+                    ajaxFilePath({objectId: objectId}, function (res) {
+                        showRight(objectId);
+                    })
+                }
+            }
+        })
+        function ajaxFilePath(data, fn, isDownLoad) {
+            var url = yunIP + "/api/cs/v0.1/private/" + (data.objectId == 0 ? "" : data.objectId);
+            url = data.objectId == 1 ? yunIP + "/api/cs/v0.1/share/my" : (activeFileId == 1 ?  yunIP + "/api/cs/v0.1/share/" + data.objectId : url);
+            if (isDownLoad) {//下载文件
+                url += "?accessToken=" + accessToken;
+                download(url);
+            } else {//加载列表
+                var loadImg = new loading(999, 0);
+                loadImg.open("资源加载中...", $(".rightContent"));
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader('accessToken', accessToken);
+                        XMLHttpRequest.setRequestHeader('schoolId', schoolId);
+                    },
+                    success: function (res) {
+                        loadImg.close();
+                        if (res && res.pageNum) {
+                            Tree[data.objectId] = res.rows.sort(function(a,b){
+                                return a.type - b.type;
+                            });
+                            var path = "";
+                            for (var i = 0; i < res.rows.length; i++) {
+                                var type = res.rows[i].name.split(".")[1];
+                                path += !type ? "<div class=\"yunPath\" objectId='" + res.rows[i].objectId + "'><div class=\"yunPathSrc\"><div class=\"yunPathName\">" + res.rows[i].name + "</div></div></div>" : "";
+                            }
+                            path = path ? "<div class=\"yunPathChild\">" + path + "</div>" : "";
+                            $(".yunPath[objectId='" + data.objectId + "']").append(path);
+                            fn(res.rows);
+                        } else {
+                            alertx("获取失败，请点击重试!", function () {
+                                fn(false);
+                            });
+                        }
+                    },
+                    fail: function (e) {
+                        loadImg.close();
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            alertx("登录过期，请重新登陆",function(){
+                                localStorage.user = "";
+                                location = "login.html";
+                            })
+                        }else{
+                            alertx("获取失败，请点击重试!", function () {
+                                fn(false);
+                            });
+                        }
+                    },
+                    error: function (e) {
+                        loadImg.close();
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            alertx("登录过期，请重新登陆",function(){
+                                localStorage.user = "";
+                                location = "login.html";
+                            })
+                        }else{
+                            alertx("获取出错，请点击重试!", function () {
+                                fn(false);
+                            });
+                        }
+                    }
+                })
+            }
+        }
+
+        var Tree = {0: []};//文件树
+        var activeFileId = 0;//当前显示文件夹id
+        //加载根目录
+        ajaxFilePath({objectId: activeFileId}, function (res) {
+            showRight(activeFileId);
+        })
+        //新建文件夹
+        function addFile() {
+            if(activeFileId == 1) {
+                alertx("请先在个人云盘中新建文件夹",function(){});
+                return false;
+            };
+            var loadImg = new loading(999, 0);
+            loadImg.open("创建中...", $(".rightContent"));
+            $.ajax({
+                url: yunIP + "/api/cs/v0.1/private/" + (activeFileId == 0 ? "" : activeFileId),
+                type: "POST",
+                dataType: "json",
+                data:{folderName:'新建文件夹'},
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader('accessToken', accessToken);
+                    XMLHttpRequest.setRequestHeader('schoolId', schoolId);
+                },
+                success: function (res) {
+                    loadImg.close();
+                    if (res && res.length > 0) {
+                        var hasSite = -1;
+                        for(var i = 0; i < Tree[activeFileId].length; i++){
+                            if(Tree[activeFileId][i].objectId == res[0].objectId){
+                                hasSite = i;
+                            }
+                        }
+                        if(hasSite == -1) {
+                            Tree[activeFileId].push(res[0]);
+                            var path = "";
+                            if($(".yunPath[objectId='" + activeFileId + "'] .yunPathChild").size() == 1){
+                                path = "<div class=\"yunPath\" objectId='" + res[0].objectId + "'><div class=\"yunPathSrc\"><div class=\"yunPathName\">" + res[0].name + "</div></div></div>";
+                                $(".yunPath[objectId='" + activeFileId + "'] .yunPathChild").append(path);
+                            }else{
+                                path = "<div class=\"yunPathChild\"><div class=\"yunPath\" objectId='" + res[0].objectId + "'><div class=\"yunPathSrc\"><div class=\"yunPathName\">" + res[0].name + "</div></div></div></div>";
+                                $(".yunPath[objectId='" + activeFileId + "']").append(path);
+                            }
+                        }else{
+                            Tree[activeFileId][hasSite] = res[0];
+                        }
+                        showRight(activeFileId);
+                    } else {
+                        alertx("新建文件夹失败");
+                    }
+                },
+                fail: function (e) {
+                    loadImg.close();
+                    if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                        alertx("登录过期，请重新登陆",function(){
+                            localStorage.user = "";
+                            location = "login.html";
+                        })
+                    }else{
+                        alertx("新建文件夹失败");
+                    }
+                },
+                error: function (e) {
+                    loadImg.close();
+                    if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                        alertx("登录过期，请重新登陆",function(){
+                            localStorage.user = "";
+                            location = "login.html";
+                        })
+                    }else{
+                        alertx("新建文件夹出错");
+                    }
+                }
+            })
+        }
+
+        //上传本地文件
+        function upLoadLocalFile() {
+            upload(yunIP + "/api/cs/v0.1/private/" + (activeFileId == 0 ? "" : activeFileId), "multiple", function (res) {
+                if (res && res.length > 0) {
+                    for (var i = 0; i < res.length; i++) {
+                        var hasSite = -1;
+                        for(var j = 0; j < Tree[activeFileId].length; j++){
+                            if(Tree[activeFileId][j].objectId == res[i].objectId){
+                                hasSite = j;
+                            }
+                        }
+                        if(hasSite == -1){
+                            Tree[activeFileId].push(res[i]);
+                        }else{
+                            Tree[activeFileId][j] = res[i];
+                        }
+                    }
+                    showRight(activeFileId);
+                }
+            })
+        }
+
+        //删除文件
+        function deleteFile(deleteId) {
+            var loadImg = new loading(999, 0);
+            loadImg.open("删除中...", $(".rightContent"));
+            if(!deleteId.join){//单个删除
+                deleteFn(deleteId,function(res,msg){
+                    loadImg.close();
+                    if(res) {
+                        alertx(msg);
+                        showRight(activeFileId);
+                    }else{
+                        if(msg == "登录过期，请重新登陆"){
+                            confirmx(msg,function(){
+                                localStorage.user = "";
+                                location = "login.html";
+                            })
+                        }else{
+                            alertx(msg);
+                        }
+                    }
+                });
+            }else{//删除多个文件数组
+                var start = 0;
+                var successString = ",";
+                var failString = ",";
+                deleteFn(deleteId[start],deleteEnd);
+            }
+            function deleteEnd(res,msg){
+                if(!res) {
+                    failString += deleteId[start] + ":" + msg + ",";
+                }else{
+                    successString += deleteId[start] + ":" + msg + ",";
+                }
+                start ++;
+                if(start < deleteId.length){
+                    deleteFn(deleteId[start],deleteEnd);
+                }else{//全部操作完成
+                    loadImg.close();
+                    var failMsg = "";
+                    $(".checked").each(function(){
+                        var id = $(this).parent().attr("objectid");
+                        if(successString.indexOf("," + id + ":") > -1){//删除成功,移除显示
+                            $(this).parent().remove();
+                        }
+                        if(failString.indexOf("," + id + ":") > -1){//删除成功,移除显示
+                            var name = $(this).next().next().attr("title");
+                            var msg = failString.replace(new RegExp("^," + id + ":(.*),$"),"$1");
+                            failMsg += "<div style='color:#ff0000;'>" + name + " 删除失败，" + msg + "</div>";
+                        }
+                    })
+                    if(failMsg == ""){
+                        alertx("删除完成");
+                    }else{
+                        alertx("<div>操作完成,部分删除失败:</div>" + failMsg);
+                    }
+                }
+            }
+            function deleteFn(deleteId,fn){
+                if(Tree[deleteId] && Tree[deleteId].length > 0) {
+                    fn(false,"删除文件夹之前，请先删除其中的文件");
+                    return false;
+                }
+                $.ajax({
+                    url: yunIP + "/api/cs/v0.1/private/" + deleteId,
+                    type: "DELETE",
+                    dataType: "json",
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader('accessToken', accessToken);
+                        XMLHttpRequest.setRequestHeader('schoolId', schoolId);
+                    },
+                    success: function (res) {
+                        if (res && res.result) {
+                            var shareObjectId = 0;
+                            var newArr = [];
+                            for (var i = 0; i < Tree[activeFileId].length; i++) {
+                                if (Tree[activeFileId][i].objectId != deleteId) {
+                                    newArr.push(Tree[activeFileId][i]);
+                                }else{
+                                    shareObjectId = Tree[activeFileId][i].shareObjectId;
+                                }
+                            }
+                            Tree[activeFileId] = newArr;
+                            if(Tree["1"]){
+                                var newA = [];
+                                for(var i = 0; i < Tree["1"].length; i++){
+                                    if(Tree["1"][i].objectId != shareObjectId){
+                                        newA.push(Tree["1"][i]);
+                                    }
+                                }
+                                Tree["1"] = newA;
+                            }
+                            $(".yunPath[objectId='" + deleteId + "']").remove();
+                            fn(true,"删除成功");
+                        } else {
+                            fn(false,"删除失败");
+                        }
+                    },
+                    fail: function (e) {
+                        var msg = "删除失败";
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            msg = "登录过期，请重新登陆";
+                        }
+                        fn(false,msg);
+                    },
+                    error: function (e) {
+                        var msg = "删除出错";
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            msg = "登录过期，请重新登陆";
+                        }
+                        fn(false,msg);
+                    }
+                })
+            }
+        }
+
+        //修改文件
+        function editFile(editId, value) {
+            var loadImg = new loading(999, 0);
+            loadImg.open("正在修改...", $(".rightContent"));
+            $.ajax({
+                url: yunIP + "/api/cs/v0.1/private/" + editId,
+                type: "PUT",
+                dataType: "json",
+                data: {newName: value},
+                beforeSend: function (XMLHttpRequest) {
+                    XMLHttpRequest.setRequestHeader('accessToken', accessToken);
+                    XMLHttpRequest.setRequestHeader('schoolId', schoolId);
+                },
+                success: function (res) {
+                    loadImg.close();
+                    if (res && res.result) {
+                        for (var i = 0; i < Tree[activeFileId].length; i++) {
+                            if (Tree[activeFileId][i].objectId == editId) {
+                                Tree[activeFileId][i].name = value;
+                            }
+                        }
+                        $(".yunPath[objectId='" + editId + "'] .yunPathName").eq(0).html(value);
+                    } else {
+                        alertx("修改失败");
+                    }
+                    showRight(activeFileId);
+                },
+                fail: function (e) {
+                    loadImg.close();
+                    alertx("修改失败");
+                    if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                        alertx("登录过期，请重新登陆",function(){
+                            localStorage.user = "";
+                            location = "login.html";
+                        })
+                    }else{
+                        showRight(activeFileId);
+                    }
+                },
+                error: function (e) {
+                    loadImg.close();
+                    alertx("修改出错");
+                    if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                        alertx("登录过期，请重新登陆",function(){
+                            localStorage.user = "";
+                            location = "login.html";
+                        })
+                    }else{
+                        showRight(activeFileId);
+                    }
+                }
+            })
+        }
+
+        //修改共享文件
+        function editFileShare(editId, bool) {
+            var loadImg = new loading(999, 0);
+            loadImg.open(bool ? "正在共享..." : "正在取消共享...", $(".rightContent"));
+            if(!editId.join){//单个操作，多个操作
+                shareFn(editId,function(res,msg){
+                    loadImg.close();
+                    if(res) {
+                        alertx(msg);
+                        showRight(activeFileId);
+                    }else{
+                        if(msg == "登录过期，请重新登陆"){
+                            confirmx(msg,function(){
+                                localStorage.user = "";
+                                location = "login.html";
+                            })
+                        }else{
+                            alertx(msg);
+                        }
+                    }
+                });
+            }else{
+                var start = 0;
+                var successString = ",";
+                var failString = ",";
+                shareFn(editId[start],shareEnd);
+            }
+            function shareEnd(res,msg){
+                if(!res) {
+                    failString += editId[start] + ":" + msg + ",";
+                }else{
+                    successString += editId[start] + ":" + msg + ",";
+                }
+                start ++;
+                if(start < editId.length){
+                    shareFn(editId[start],shareEnd);
+                }else{//全部操作完成
+                    loadImg.close();
+                    var failMsg = "";
+                    $(".checked").each(function(){
+                        var id = $(this).parent().attr("objectid");
+                        if(successString.indexOf("," + id + ":") > -1){
+                            if(bool){
+                                $(this).parent().append("<span style=\"color:#3ec0ef;font-size: 12px\">已共享</span>");
+                                $(this).parent().attr("type",$(this).parent().attr("type") + "_share");
+                            }else{
+                                if(activeFileId != 1){
+                                    $(this).parent().find("span").last().remove();
+                                    $(this).parent().attr("type",$(this).parent().attr("type").replace("_share",""));
+                                }else{
+                                    $(this).parent().remove();
+                                }
+                            }
+                        }
+                        if(failString.indexOf("," + id + ":") > -1){
+                            var name = $(this).next().next().attr("title");
+                            var msg = failString.replace(new RegExp("^," + id + ":(.*),$"),"$1");
+                            failMsg += "<div style='color:#ff0000;'>" + name + " 操作失败，" + msg + "</div>";
+                        }
+                    })
+                    if(failMsg == ""){
+                        alertx("操作完成");
+                    }else{
+                        alertx("<div>操作完成,部分操作失败:</div>" + failMsg);
+                    }
+                }
+            }
+            function shareFn(editId,fn){
+                var shareId = editId;
+                if(!bool && activeFileId != 1){
+                    for(var i = 0; i < Tree[activeFileId].length; i++){
+                        if(Tree[activeFileId][i].objectId == editId){
+                            shareId = Tree[activeFileId][i].shareObjectId;
+                        }
+                    }
+                }
+                $.ajax({
+                    url: yunIP + "/api/cs/v0.1/share/" + shareId,
+                    type: bool ? "POST" : "DELETE",
+                    dataType: "json",
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader('accessToken', accessToken);
+                        XMLHttpRequest.setRequestHeader('schoolId', schoolId);
+                    },
+                    success: function (res) {
+                        loadImg.close();
+                        if (res && (res.id || res.result || res.dataId)) {
+                            if(bool){//新增共享
+                                for (var i = 0; i < Tree[activeFileId].length; i++) {
+                                    if (Tree[activeFileId][i].objectId == editId) {
+                                        Tree[activeFileId][i].shared = bool;
+                                        Tree[activeFileId][i].shareObjectId = res.dataId;
+                                        if(Tree["1"]){
+                                            var o = {
+                                                "createDate": Tree[activeFileId][i]["createDate"],
+                                                "name": Tree[activeFileId][i]["name"],
+                                                "objectId": res.dataId,
+                                                "size": Tree[activeFileId][i]["size"],
+                                                "originObjectId":Tree[activeFileId][i]["objectId"],
+                                                "type": Tree[activeFileId][i]["type"],
+                                                "thumbnail": Tree[activeFileId][i]["thumbnail"],
+                                                "contentType": Tree[activeFileId][i]["contentType"],
+                                                "shared":true
+                                            }
+                                            Tree["1"].push(o);
+                                        }
+                                    }
+                                }
+                            }else{//删除共享
+                                if(activeFileId == 1){//从我的共享中删除
+                                    var originObjectId = 0;
+                                    var newA = [];
+                                    for(var i = 0; i < Tree["1"].length; i++){
+                                        if(Tree["1"][i].objectId != editId){
+                                            newA.push(Tree["1"][i]);
+                                        }else{
+                                            originObjectId = Tree["1"][i].originObjectId;
+                                        }
+                                    }
+                                    Tree["1"] = newA;
+                                    for(var k in Tree){
+                                        for(var i = 0; i < Tree[k].length; i++){
+                                            if(Tree[k][i].objectId == originObjectId){
+                                                Tree[k][i].shared = false;
+                                                Tree[k][i].shareObjectId = "";
+                                            }
+                                        }
+                                    }
+                                }else{//从个人云盘中删除
+                                    var _shareId = 0;
+                                    for (var i = 0; i < Tree[activeFileId].length; i++) {
+                                        if (Tree[activeFileId][i].objectId == editId) {
+                                            Tree[activeFileId][i].shared = false;
+                                            _shareId = Tree[activeFileId][i].shareObjectId;
+                                            Tree[activeFileId][i].shareObjectId = "";
+                                        }
+                                    }
+                                    if(Tree["1"]){
+                                        var newA = [];
+                                        for(var i = 0; i < Tree["1"].length; i++){
+                                            if(Tree["1"][i].objectId != _shareId){
+                                                newA.push(Tree["1"][i]);
+                                            }
+                                        }
+                                        Tree["1"] = newA;
+                                    }
+                                }
+                            }
+                            fn(true,"操作成功");
+                        } else {
+                            fn(false,"操作失败");
+                        }
+                    },
+                    fail: function (e) {
+                        var msg = "操作失败";
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            msg = "登录过期，请重新登陆";
+                        }
+                        fn(false,msg);
+                    },
+                    error: function (e) {
+                        var msg = "操作出错";
+                        if(e.responseText && e.responseText.indexOf("accessToken无效") > 0){
+                            msg = "登录过期，请重新登陆";
+                        }
+                        fn(false,msg);
+                    }
+                })
+            }
+        }
+
+        //加载右部分
+        function showRight(id) {
+            var files = "";
+            if (Tree[id]) {
+                for (var i = 0; i < Tree[id].length; i++) {
+                    var fileType = Tree[id][i].type == 1 ? "file" : Tree[id][i].name.replace(/^.+\.(.+)$/,"$1").toLowerCase();
+                    var noTypeList = "|xslt|psd|bat|xml|xlsx|zip|";//不支持文件类型清单
+                    var imgSrc = Tree[id][i].thumbnail ? Tree[id][i].thumbnail : "";//图片文件显示预览
+                    var type = !Tree[id][i].shared ? fileType : fileType + "_share";
+                    var showName = Tree[id][i].name.replace(/^(.{0,14})(.*)(\..+?)$/,function($0,$1,$2,$3){
+                        if($2.length > 2){
+                            return $1 + ".." + $3;
+                        }else{
+                            return $0;
+                        }
+                    })
+                    var background = fileType == "file" ? "background:url(\"images/icon_file.png\") center center no-repeat" : "background-color:rgb(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 200) + "," + parseInt(Math.random() * 155) + ")";
+                    fileType = fileType == "file" ? "" : fileType.toUpperCase();
+                    var fileSize = Tree[id][i].size;
+                    var unit = "B";
+                    if(fileSize > 1024){
+                        fileSize = Math.ceil(fileSize / 1024);
+                        unit = "KB";
+                        if(fileSize > 1024){
+                            fileSize = parseInt(fileSize / 1024 * 100) / 100;
+                            unit = "MB";
+                        }
+                    }
+                    fileSize += unit;
+                    files += "<div class=\"yunFiles\" objectId='" + Tree[id][i].objectId + "' type='" + type + "'><div src='" + imgSrc + "' style='" + background + "' class=\"yunFilesImg unSelect\" title='" + Tree[id][i].name + "\n\n大小:" + fileSize + "\n时间:" + Tree[id][i].createDate + "'>" + fileType + "</div><div class=\"yunFilesName\" title='"+Tree[id][i].name+"'>" + showName + "</div>" + (Tree[id][i].shared ? "<span style='color:#3ec0ef;font-size: 12px'>已共享</span>" : "") + "</div>";
+                }
+            }
+            files += " <div class=\"clear\"></div>";
+            activeFileId = id;
+            var p = Pid();
+            $("#NowFileName").html(p && p.obj && p.obj.name ? p.obj.name : (activeFileId == 1 ? "我的共享" : "个人云盘"));
+            if(activeFileId == 1){
+                $("#addFileBtn,#upLoadFileBtn,#ParentFileBtn").hide();
+            }else{
+                $("#addFileBtn,#upLoadFileBtn,#ParentFileBtn").show();
+            }
+            $("#yunFiles").html(files);
+            bindRightEvent();
+
+            setTimeout(function(){
+                $("#yunFiles .yunFilesImg").each(function(){
+                    var _this = $(this);
+                    if(_this.attr("src")){
+                        var img = document.createElement("img");
+                        img.onload = function(){
+                            var wh = setImgSize(this.width,this.height);
+                            _this.after(this);
+                            $(this).attr("class",_this.attr("class"));
+                            $(this).attr("title",_this.attr("title"));
+                            _this.remove();
+                            $(this).css({width:wh[0] + "px",height:wh[1] + "px",marginTop:wh[2] + "px",marginBottom:wh[2] + "px",background:"none"});
+                        }
+                        img.src = _this.attr("src");
+                    }
+                })
+            },300);
+            function setImgSize(w,h){
+                var box_w = 150,box_h = 105;
+                var _w,_h,_m;
+                if(w <= box_w && h <= box_h){
+                    _w = w;
+                    _h = h;
+                }else if(w >= box_w){
+                    _w = box_w;
+                    _h = box_w / w * h;
+                    if(_h > box_h){
+                        _h = box_h;
+                        _w = box_h / h * w;
+                    }
+                }else if(h >= box_h){
+                    _h = box_h;
+                    _w = box_h / h * w;
+                    if(_w > box_w){
+                        _w = box_w;
+                        _h = box_w / w * h;
+                    }
+                }
+                _m = (box_h - _h)/2;
+                return [_w,_h,_m];
+            }
+        }
+
+        function Pid() {
+            var rc = {objectId: 0, obj: {}};
+            if ($(".yunPath[objectId='" + activeFileId + "']").parent().attr("id") == "yunPath") {
+                rc.objectId = 0;
+            } else {
+                rc.objectId = $(".yunPath[objectId='" + activeFileId + "']").parent().parent().attr("objectId");
+            }
+            for (var i = 0; i < Tree[rc.objectId].length; i++) {
+                if (Tree[rc.objectId][i].objectId == activeFileId) {
+                    rc.obj = Tree[rc.objectId][i];
+                }
+            }
+            return rc;
+        }
+
+        var Contextmenu = {
+            list: [],
+            isOpen: false,
+            id: "",
+            obj: null,
+            open: function (left, top,checkOpen) {
+                var _this = this;
+                if (this.isOpen) this.close();
+                this.isOpen = true;
+                this.id = "contextmenu" + (new Date()).getTime();
+                var box = "<div class='contextmenu' id='" + this.id + "' style='position: fixed;z-index: 999;  background: #3ec0ef; width: 65px;right: -65px;top: 220px;border-radius: 0px 0px 0px 0px;' class='boxShadow'>";
+                for (var i = 0; i < this.list.length; i++) {
+                    box += "<div style='text-align:center;color:#fff;cursor: pointer;font-size:12px;padding:8px 0px;'>" + this.list[i].text + "</div>";
+                }
+                box += "</div>";
+                if (this.list.length > 0) {
+                    if (this.obj == window || this.obj == null) {
+                        $("body").append(box);
+                    } else {
+                        this.obj.append(box);
+                    }
+                }
+                $("#" + this.id).children().each(function (i) {
+                    $(this).click(function () {
+                        if(!checkOpen) Contextmenu.close();
+                        _this.list[i].fn();
+                    });
+                    $(this).mouseover(function () {
+                        $(this).css({background: "#38b0db"});
+                    });
+                    $(this).mouseout(function () {
+                        $(this).css({background: "#3ec0ef"});
+                    });
+                })
+                $("#" + this.id).animate({right:"0px"},300);
+            },
+            close: function () {
+                this.isOpen = false;
+                $("#" + this.id).remove();
+                $(".contextmenu").remove();
+            },
+            closeAll: function(){
+                $(".contextmenu").remove();
+            }
+        }
+    }
+</script>

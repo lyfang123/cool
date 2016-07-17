@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.supplierResource.dao.ExtendSupplierResourceMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.supplierResource.ctrl.dto.SupplierResourceInfo" >
+    <id column="id" property="resourceId"/>
+    <result column="name" property="resourceName" jdbcType="VARCHAR" />
+    <result column="img_url" property="resourcePic" jdbcType="VARCHAR" />
+    <result column="read_num" property="readNum" jdbcType="INTEGER" />
+    <result column="download_num" property="downloadNum" jdbcType="INTEGER" />
+    <result column="read_num" property="readNum" jdbcType="INTEGER" />
+    <result column="description" property="resourceDesc" jdbcType="VARCHAR" />
+    <result column="collectionNum" property="collectionNum" />
+  </resultMap>
+
+  <!-- 学校资源查询 -->
+  <select id="querySchoolResourceList" resultMap="BaseResultMap"
+          parameterType="com.uwaytech.supplierResource.domain.SupplierResourceParam" >
+    select id,name,description,img_url,read_num,download_num,
+    (select count(t1.id) from collection t1 where t1.cell_id = t.id) as collection_num
+    from school_resource t
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != mediaType">
+        and t.media_type = #{mediaType}
+      </if>
+      <if test="null != useType">
+        and t.use_type = #{useType}
+      </if>
+      <if test="null != schoolId">
+        and t.school_id = #{schoolId}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    <if test="null != type">
+      <if test="1 == type">
+        order by t.read_num desc
+      </if>
+      <if test="2 == type">
+        order by t.create_time desc
+      </if>
+    </if>
+  </select>
+
+
+  <!-- 供应商资源查询（精品资源库） -->
+  <select id="querySupplierResourceList" resultMap="BaseResultMap"
+          parameterType="com.uwaytech.supplierResource.domain.SupplierResourceParam" >
+    select id,name,description,img_url,read_num,download_num,
+    (select count(t1.id) from collection t1 where t1.cell_id = t.id) as collection_num
+    from supplier_resource t
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != mediaType">
+        and t.media_type = #{mediaType}
+      </if>
+      <if test="null != useType">
+        and t.use_type = #{useType}
+      </if>
+      <if test="null != checkStatus">
+        and t.check_status = #{checkStatus}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    <if test="null != type">
+      <if test="1 == type">
+        order by t.read_num desc
+      </if>
+      <if test="2 == type">
+        order by t.create_time desc
+      </if>
+    </if>
+  </select>
+
+  <!-- 学校资源分类统计  -->
+  <select id="querySchoolCategoryList" resultType="com.uwaytech.supplierCourse.ctrl.dto.CategoryInfo"
+          parameterType="com.uwaytech.supplierResource.domain.SupplierResourceParam" >
+    select sum(res.counts) as counts,res.parent_id as categoryId, t2.name as categoryName from (
+    select count(t.id) as counts,t1.id as category_id, t1.parent_id, t1.name
+    from school_resource t left join customer_category t1 on t.category_id = t1.id
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != schoolId">
+        and t.school_id = #{schoolId}
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    group by t1.id) res left join customer_category t2 on res.parent_id = t2.id
+    group by res.parent_id
+
+  </select>
+
+  <!-- 供应商资源分类统计  -->
+  <select id="querySupplierCategoryList" resultType="com.uwaytech.supplierCourse.ctrl.dto.CategoryInfo"
+          parameterType="com.uwaytech.supplierResource.domain.SupplierResourceParam" >
+    select sum(res.counts) as counts,res.parent_id as categoryId, t2.name as categoryName from (
+    select count(t.id) as counts,t1.id as category_id, t1.parent_id, t1.name
+    from supplier_resource t left join category t1 on t.category_id = t1.id
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != schoolId">
+        and t.school_id = #{schoolId}
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != checkStatus">
+        and t.check_status = #{checkStatus}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    group by t1.id) res left join category t2 on res.parent_id = t2.id
+    group by res.parent_id
+  </select>
+
+  <!-- 查询资源类型 -->
+  <select id="queryCommCategoryList" resultType="com.uwaytech.supplierCourse.ctrl.dto.CategoryInfo"
+          parameterType="java.lang.Integer" >
+    select t2.id as categoryId, t2.name as categoryName
+    from category t2
+    <where>
+      1=1
+      <if test="null != type">
+        and t2.type = #{type}
+      </if>
+    </where>
+  </select>
+</mapper>

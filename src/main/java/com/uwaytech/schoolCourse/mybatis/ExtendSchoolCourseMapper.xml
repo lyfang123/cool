@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.schoolCourse.dao.ExtendSchoolCourseMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.schoolCourse.domain.SchoolCourse" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+    <result column="view_num" property="viewNum" jdbcType="BIGINT" />
+    <result column="collection_num" property="collectionNum" jdbcType="BIGINT" />
+    <result column="course_time" property="courseTime" jdbcType="VARCHAR" />
+    <result column="chapter_num" property="chapterNum" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="BIGINT" />
+    <result column="end_time" property="endTime" />
+  </resultMap>
+
+  <!-- 学校课程查询 -->
+  <select id="querySchoolCourseList" resultMap="BaseResultMap"
+          parameterType="com.uwaytech.schoolCourse.domain.SchoolCourseParam" >
+    select id,name,description,img_url,view_num,
+    (select count(t1.id) from collection t1 where t1.cell_id = t.id) as collection_num,
+    course_time,chapter_num,type,end_time
+    from school_course t
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != userType">
+        and t.type = #{userType}
+      </if>
+      <if test="null != schoolId">
+        and t.school_id = #{schoolId}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    <if test="null != type">
+      <if test="1 == type">
+        order by t.view_num desc
+      </if>
+      <if test="2 == type">
+        order by t.create_time desc
+      </if>
+    </if>
+  </select>
+
+  <!-- 学校课程分类统计  -->
+  <select id="queryCategoryList" resultType="com.uwaytech.supplierCourse.ctrl.dto.CategoryInfo"
+          parameterType="com.uwaytech.schoolCourse.domain.SchoolCourseParam" >
+    select sum(res.counts) as counts,res.parent_id as categoryId, t2.name as categoryName from (
+    select count(t.id) as counts,t1.id as category_id, t1.parent_id, t1.name
+    from school_course t left join customer_category t1 on t.category_id = t1.id
+    <where>
+      1=1
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != userType">
+        and t.type = #{userType}
+      </if>
+      <if test="null != schoolId">
+        and t.school_id = #{schoolId}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    group by t1.id) res left join customer_category t2 on res.parent_id = t2.id
+    group by res.parent_id
+
+  </select>
+</mapper>

@@ -1,0 +1,74 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="finance"><b id='eBalance' style="color: #fa5106;">--（e币）</b><div>账户余额</div></div>
+        <div class="finance"><b id='eAmounts' style="color: #19b0e0;">--（e币）</b><div>已消费</div></div>
+        <div class="finance" style="border-right: none;"><b id='downloadNum' style="color: #19b0e0;">--（e币）</b><div>已下载资源</div></div>
+        <div class="clear"></div>
+        <div class="eBalanceTip"><div id="eBalanceTip">温馨提示：您的账户余额不足100e币~~！</div></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+    .finance{
+        float: left;
+        width: 33%;
+        height: 80px;
+        border-right: 1px solid #e4e4e4;
+        text-align: center;
+        padding-top: 40px;
+        color: #999999;
+    }
+    .finance b{
+        font-size: 24px;
+        cursor: pointer;
+    }
+    #eBalanceTip{
+        border-top: 1px solid #e4e4e4;
+        height: :30px;
+        line-height: 30px;
+        text-align: left;
+        padding: 20px;
+        color: #fa5106;
+        margin-top: 20px;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var ajax = new Ajax(webIP + "/api/finance/v0.1/school");
+        ajax.do(function(res){
+            if(res){
+                $("#eBalance").html(res.eBalance + "(e币)");
+                if(res.eBalance >= 100){
+                    $("#eBalanceTip").hide();
+                }
+                $("#eAmounts").html(res.eAmounts + "(e币)");
+                $("#downloadNum").html(res.downloadNum + "(个)");
+                $("#eAmounts").click(function(){
+                    open({url: "modules/school/finance/rechargeList.html", title: "入账记录"});
+                })
+                $("#downloadNum").click(function(){
+                    open({url: "modules/school/finance/downloadList.html", title: "下载明细"});
+                })
+            }
+        })
+
+        var option = {pageSize: 12, pageNum: 1};
+        var config = [
+        	{CH: "月份", EN: "date",Align:"center"},
+            {CH: "已消费e币", EN: "eCoin",Align:"center"},
+            {CH: "已下载资源个数", EN: "downloadCount",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/finance/v0.1/statistics", option, config);
+        list.load(function () {
+            $("tr").each(function(i){
+                
+            })
+            
+        });
+    }
+</script>

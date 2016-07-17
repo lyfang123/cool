@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.commentScore.dao.ExtendCommentScoreMapper">
+
+    <resultMap id="BaseResultMap" type="com.uwaytech.commentScore.domain.FastCommentInfo">
+        <id column="comment_id" property="commentId"/>
+        <result column="comment_name" property="commentName"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <!-- 查询评论平均分 -->
+    <select id="queryAvgScore" parameterType="java.lang.Long" resultType="java.lang.Double">
+        select avg(t.score) from comment_score t
+        <where>
+            1=1
+            <if test="null != materialId">
+                and t.material_id = #{materialId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询快捷评论 -->
+    <select id="queryFastComment" resultMap="BaseResultMap">
+        select t1.comment_name,t1.comment_id,
+        IFNULL((select t2.count from fast_comment t2 where t2.comment_id = t1.comment_id and t2.material_id = #{materialId}),0) as count
+        from comment_category t1 where t1.category_id = #{categoryId}
+      </select>
+
+    <!-- 查询分类Id -->
+    <select id="querySchoolCategoryId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select t1.parent_id from customer_category t1 where
+        t1.id = (select t2.parent_id from customer_category t2 where t2.id =
+        (select t3.category_id from school_course t3 where t3.id = #{materialId}))
+    </select>
+</mapper>

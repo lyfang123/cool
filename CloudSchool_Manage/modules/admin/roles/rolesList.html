@@ -1,0 +1,106 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<style type="text/css">
+  .listRIdsEdit{
+    color: #03acde;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .listRIdsEdit{
+        background: url("images/icon_listModules.png") center center no-repeat;
+        width: 16px;
+        height: 16px;
+        border: none;
+        color: rgba(255,255,255,0);
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .listRIdsEdit:hover{
+        background: url("images/icon_listModules_active.png") center center no-repeat;
+    }
+</style>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "角色名称", EN: "roleName", Align: "center"},
+            {CH: "角色描述", EN: "roleDesc"},
+            {CH: "权限配置", EN: "",Align:"center",htmlFormat: "<span class=\"listRIdsEdit\">权限配置</span>"}
+        ];
+        var list = new List(webIP + "/api/security/v0.1/roles", option, config);
+        list.listNumTitle = "序号";
+        list.btns = "<span class=\"listEdit\">修改</span><span class=\"listDelete\">删除</span>";
+        list.checkBtn = false;
+        list.load(function () {
+            $("tr").each(function(i){
+              if(i > 0 && JSON.parse($(this).attr("data")).type == 1){
+                $(this).find(".tdBtns").remove();
+              }
+            })
+            //操作
+            //修改
+           $(".listEdit").click(function(){
+               open({url:"modules/admin/roles/rolesEdit.html",title:"编辑角色",data:{id:JSON.parse($(this).parents("tr").attr("data")).id}});
+           });
+           //修改权限
+           $(".listRIdsEdit").click(function(){
+               open({url:"modules/admin/roles/rolesRIdsEdit.html",title:"角色权限配置",data:{id:JSON.parse($(this).parents("tr").attr("data")).id}});
+           });
+           //人员管理
+           /*$(".listUsers").click(function(){
+                open({url:"modules/groups/groupsUsersList.html",title:"人员管理",data:{id:JSON.parse($(this).parents("tr").attr("data")).groupId}});
+           })*/
+           //责任人
+//           $("tr").each(function(){
+//              var data = $(this).attr("data");
+//              if(data){
+//                data = JSON.parse(data);
+//                if(data.leaderName){
+//                  if(data.leaderName.length > 1){
+//                    $(this).find("td").eq(4).html(data.leaderName[0] + "...");
+//                  }else{
+//                    $(this).find("td").eq(4).html(data.leaderName[0]);
+//                  }
+//                }
+//              }
+//           })
+            //删除
+           $(".listDelete").click(function(){
+               var id = JSON.parse($(this).parents("tr").attr("data")).id;
+               confirmx("确定要删除吗？",function(){
+                   var ajax = new Ajax(webIP + "/api/security/v0.1/roles/" + id);
+                   ajax.data = {roleId:id};
+                   ajax.meth = "DELETE";
+                   ajax.loading.msg = "正在删除...";
+                   ajax.do(function(res){
+                       if(res && res.result){
+                            alertx("删除角色成功",function(){
+                                list.load();
+                            });
+                        }else{
+                            alertx("删除角色失败" + "<div style='color:#ff0000;'>" + res.errorMsg + "</div>");
+                        }
+                   });
+               })
+           })
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/admin/roles/rolesEdit.html",title:"新增角色"});
+        })
+        $("#downLoadExcel").click(function(){
+            list.toExcel("角色信息");
+        })
+    }
+</script>

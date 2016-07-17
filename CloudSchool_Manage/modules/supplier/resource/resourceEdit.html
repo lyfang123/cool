@@ -1,0 +1,200 @@
+<form class="form">
+    <div class="form_title"><b>资源信息编辑</b><span class="red">(*为必填项)</span></div>
+    <div class="formBox borderLeft borderRight borderBottom">
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>资源名称</div>
+            <span class="data_error">资源名称不能为空</span><input class="input" id="data-name" type="text" placeholder="请填写资源名"/>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>资源分类</div>
+            <span class="data_error">资源分类不能为空</span>
+            <div id="data-category"></div>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>媒体类型</div>
+            <span class="data_error">媒体类型不能为空</span>
+            <div id="data-mediaType"></div>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>应用类型</div>
+            <span class="data_error">应用类型不能为空</span>
+            <div id="data-useType"></div>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>对应e币（个）</div>
+            <span class="data_error">对应e币不能为空</span><input class="input" id="data-eCoin" type="text" placeholder="请填写对应e币"/>
+        </div>
+        <div class="data width100"><div class="data_title"><b class="red">*</b>缩略图</div>
+            <div style="margin-left: 50px;">
+                <div id="data-imgUrl" type="img"></div>
+                <span style="color: #ccc">建议尺寸100x100</span>
+            </div>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>描述</div>
+            <span class="data_error">描述不能为空</span><textarea id="data-description" class="input" style="height: 90px;" placeholder="请填写描述"></textarea>
+        </div>
+        <div class="data width100">
+            <div class="data_title"><b class="red">*</b>资源文件</div>
+            <span class="data_error">资源文件不能为空</span>
+            <div id="data-resource"></div>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="submit" value="保存" class="bg_00b7ee"/>
+        <input type="button" id="cancel" value="取消" class="bg_ffffff"/>
+    </div>
+</form>
+<style>
+    #data-imgUrl{
+        width: 100px;
+        height:100px;
+        overflow: hidden;
+    }
+    #data-imgUrl img{
+        width: 100px;
+    }
+</style>
+<script>
+    function load() {
+
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            id : getUrlParam("id"),
+            imgUrl : new Img($("#data-imgUrl"), "<div style='cursor:pointer; background:#e4e4e4; height:100px; width:100px; line-height:100px;text-align:center; color:#ccc;'>上传图标</div>"),
+            name : $("#data-name"),
+            category : new Linkage($("#data-category"),1,{url:webIP + "/api/category/v0.1/pid/${parentId}",data:{parentId:1,type:0,pageSize: 10, pageNum: 1},meth:"GET"},"<div class='autoList' vaule='${id}'>$has{id}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span style='margin-top:10px;float:left;'>${name}</span></div>","id","parentId","name","<input value='请选择' type='text' class='input' style='width:150px;margin-right:10px;' id='num${n}' />"),
+            mediaType : new Linkage($("#data-mediaType"),1,{url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",data:{parentId:1,type:2,pageSize: 10, pageNum: 1},meth:"GET"},"<div class='autoList' vaule='${id}'>$has{id}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span style='margin-top:10px;float:left;'>${name}</span></div>","id","parentId","name","<input value='请选择' type='text' class='input' style='width:150px;margin-right:10px;' id='num${n}' />"),
+            useType : new Linkage($("#data-useType"),1,{url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",data:{parentId:1,type:1,pageSize: 10, pageNum: 1},meth:"GET"},"<div class='autoList' vaule='${id}'>$has{id}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span style='margin-top:10px;float:left;'>${name}</span></div>","id","parentId","name","<input value='请选择' type='text' class='input' style='width:150px;margin-right:10px;' id='num${n}' />"),
+            eCoin : $("#data-eCoin"),
+            description : $("#data-description"),
+            resource : new Directory($("#data-resource"),3)
+        }
+        //学校名称验证方法
+        from.name.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "资源名不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        //失去焦点进行验证
+        from.name.blur(function () {
+            from.name.verify();
+        });
+        //缩略图验证方法
+        from.imgUrl.verify = function(){
+            if (this.val() == "") {
+                alertx("缩略图不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        //课程分类验证方法
+        from.category.verify = function(){
+            if (this.val().length == 0) {
+                dataError($("#data-category"), "资源分类不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        //关键字验证方法
+//        from.keyword.verify = function(){
+//            if (this.val() == "") {
+//                dataError(this, "关键字不能为空");
+//                return false;
+//            } else {
+//                return true;
+//            }
+//        }
+//        //失去焦点进行验证
+//        from.keyword.blur(function () {
+//            from.keyword.verify();
+//        });
+        //描述验证方法
+        from.description.verify = function(){
+            if (this.val() == "") {
+                dataError(this, "描述不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        //失去焦点进行验证
+        from.description.blur(function () {
+            from.description.verify();
+        });
+        from.resource.verify = function(){
+            if (this.val().length == 0) {
+                alertx("资源不能为空");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        //修改的时候根据id加载数据
+        if (from.id) {
+            var ajax = new Ajax(webIP + "/api/resource/v0.1/" + from.id+"/detail");
+            ajax.do(function(res){
+                for(var key in from){
+                    if(typeof(from[key]) == "object" && res[key] != undefined){
+                        from[key].val(res[key]);
+                    }
+                }
+            });
+        }
+        //操作及验证
+        $("#submit").click(function () {
+            $(".data_error").hide();
+            var isOk = true;
+            var data = {};//上传参数
+            for(var k in from){
+                if(from[k] && typeof(from[k]) == "object" && "verify" in from[k]) {
+                    isOk = !from[k].verify ? isOk : (!from[k].verify() ? false : isOk);//验证
+                }
+                data[k] = from[k].val ? from[k].val() : from[k];//封装
+            }
+            if(isOk){
+                var url = webIP + "/api/resource/v0.1" + (from.id ? "/" + from.id : "");
+                var ajax = new Ajax(url);
+                ajax.data = JSON.stringify(data);
+                ajax.header.push({key:"Content-Type",vaule:"application/json"});
+                ajax.meth = from.id ? "PUT" : "POST";
+                ajax.title = "提交资源";
+                ajax.do(submitResult);
+            }
+        });
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+        //错误提示
+        function dataError(obj, msg) {
+            obj = obj.parents(".data");
+            if (!obj.attr("errorMsg")) obj.attr("errorMsg", msg);
+            if (!msg) msg = obj.attr("errorMsg");
+            obj.find(".data_error").html(msg);
+            obj.find(".data_error").show();
+        }
+        //提交后结果
+        function submitResult(res,title){
+            if(res && (res.result || res.id || res.dataId)){
+                alertx("<div style='color:#ff0000;font-weight:bold;'>" + title + "成功</div>",function(){
+                    back(-1);
+                });
+            }else{
+                var msg = "<div style='color:#ff0000;font-weight:bold;'>" + title + "失败</div>";
+                if(res && res.errorMsg){
+                    msg += res.errorMsg;
+                }else{
+                    msg += "服务器错误";
+                }
+                alertx(msg);
+            }
+        }
+    }
+</script>

@@ -1,0 +1,240 @@
+﻿.form_title{
+    line-height: 50px;
+    border-bottom: 1px solid #e4e4e4;
+    clear: both;
+}
+.form_title_img{
+    height: 20px;
+    float: left; 
+    margin-top: 15px; 
+    margin-right: 5px;
+}
+.form_line{
+    border-bottom: 1px dashed #e4e4e4;
+    padding-top: 10px;
+    clear: both;
+}
+.formBox{
+    padding:30px;
+    margin-bottom: 20px;
+}
+.border{
+    border: 1px solid #e3e3e3;
+}
+.borderTop{
+    border-top: 1px solid #e3e3e3;
+}
+.borderBottom{
+    border-bottom: 1px solid #e3e3e3;
+}
+.borderLeft{
+    border-left: 1px solid #e3e3e3;
+}
+.borderRight{
+    border-right: 1px solid #e3e3e3;
+}
+.data{
+    margin: 10px 5px;
+    overflow: hidden;
+    float: left;
+    min-height: 62px;
+}
+.data .red{
+    position: absolute;
+    margin-left: -8px;
+    margin-top: 2px;
+}
+.data_title{
+    line-height: 30px;
+}
+.data_title_border{
+    border-bottom: 1px dashed #e4e4e4;
+    margin-bottom: 10px;
+}
+.input{
+    border:1px solid #fff;
+    height: 35px;
+    border-bottom-color: #e3e3e3;
+    color: #999;
+}
+
+.input:hover{
+    border-bottom-color: #00b7ee;
+}
+select.input{
+    height: 37px;
+}
+.noBorder{
+    border:none;
+    padding-left: 0px;
+}
+.data_error{
+    padding: 5px 10px;
+    background: #5F5F5F;
+    color:#fff;
+    margin-left: 5px;
+    border-radius: 3px;
+    position: absolute;
+    margin-top: 25px;
+    display: none;
+}
+.formBtns input{
+    padding: 10px 40px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: bold;
+}
+.list_header .input{
+    border-color: #e4e4e4;
+    padding: 0px 5px;
+}
+.list_header .input:hover{
+    border-color: #e4e4e4;
+}
+.list_header .formBtns input{
+    border-radius: 0px;
+}
+.data .formBtns{
+    margin-top: 20px;
+}
+#searchBtn{
+    background-image: url("../images/icon_search.png");
+    background-repeat:no-repeat;
+    background-position:center;
+    width: 45px;
+    height: 37px;
+    margin-left: -1px;
+    position: absolute;
+    cursor: pointer;
+    color: rgba(255,255,255,0);
+}
+.richEdit{
+    width: 100%;
+    min-height: 500px;
+}
+.widthAll{
+    width: 100%;
+}
+.widthHalf{
+    width: 50%;
+}
+.width100{
+    width: 1210px;
+}
+.width100 .input{
+    width: 1105px;
+}
+.width100 select.input,.width100 .richEdit{
+    width: 1115px;
+}
+.width50{
+    width: 600px;
+}
+.width50 .input{
+    width: 500px;
+}
+.width50 select.input,.width50 .richEdit{
+    width: 510px;
+}
+@media screen and (max-width: 1550px) {
+    .width100{
+        width: 1010px;
+    }
+    .width100 .input{
+        width: 960px;
+    }
+    .width100 select.input,.width100 .richEdit{
+        width: 970px;
+    }
+    .width50{
+        width: 500px;
+    }
+    .width50 .input{
+        width: 450px;
+    }
+    .width50 select.input,.width50 .richEdit{
+        width: 460px;
+    }
+}
+@media screen and (max-width: 1350px) {
+    .width100{
+        width: 810px;
+    }
+    .width100 .input{
+        width: 710px;
+    }
+    .width100 select.input,.width100 .richEdit{
+        width: 720px;
+    }
+    .width50{
+        width: 400px;
+    }
+    .width50 .input{
+        width: 300px;
+    }
+    .width50 select.input,.width50 .richEdit{
+        width: 310px;
+    }
+}
+@media screen and (max-width: 1150px) {
+    .width100{
+        width: 710px;
+    }
+    .width100 .input{
+        width: 610px;
+    }
+    .width100 select.input,.width100 .richEdit{
+        width: 620px;
+    }
+    .width50{
+        width: 350px;
+    }
+    .width50 .input{
+        width: 250px;
+    }
+    .width50 select.input,.width50 .richEdit{
+        width: 260px;
+    }
+}
+@media screen and (max-width: 1050px) {
+    .width100{
+        width: 510px;
+    }
+    .width100 .input{
+        width: 420px;
+    }
+    .width100 select.input,.width100 .richEdit{
+        width: 430px;
+    }
+    .width50{
+        width: 250px;
+    }
+    .width50 .input{
+        width: 160px;
+    }
+    .width50 select.input,.width50 .richEdit{
+        width: 170px;
+    }
+}
+@media screen and (max-width: 840px) {
+    .width100{
+        width: 90%;
+    }
+    .width100 .input{
+        width: 80%;
+    }
+    .width100 select.input,.width100 .richEdit{
+        width: 81%;
+    }
+    .width50{
+        width: 90%;
+    }
+    .width50 .input{
+        width: 80%;
+    }
+    .width50 select.input,.width50 .richEdit{
+        width: 81%;
+    }
+}

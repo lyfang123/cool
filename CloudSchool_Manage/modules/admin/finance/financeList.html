@@ -1,0 +1,79 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="name" class="input" type="text" placeholder="供应商名称"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+        </div>
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+            {CH: "名称", EN: "name", Align: "center"},
+            {CH: "供应商账号", EN: "account"},
+            {CH: "联系人", EN: "contacts",Align:"center"},
+            {CH: "电话", EN: "phone",Align:"center"},
+            {CH: "地址", EN: "address",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/supplier/v0.1/list", option, config);
+        list.listNumTitle = "序号";
+        list.btns = "<span class=\"listEdit\">修改</span><span class=\"listDelete\">删除</span>";
+        list.checkBtn = false;
+        list.load(function () {
+            //操作
+            //修改
+           $(".listEdit").click(function(){
+               open({url:"modules/admin/finance/financeEdit.html",title:"编辑供应商",data:{id:JSON.parse($(this).parents("tr").attr("data")).supplierId}});
+           });
+            //删除
+           $(".listDelete").click(function(){
+               var id = JSON.parse($(this).parents("tr").attr("data")).supplierId;
+               confirmx("确定要删除吗？",function(){
+                   var ajax = new Ajax(webIP + "/api/supplier/v0.1/" + id);
+                   ajax.meth = "DELETE";
+                   ajax.loading.msg = "正在删除...";
+                   ajax.do(function(res){
+                       if(res && res.result){
+                            alertx("删除供应商成功",function(){
+                                list.load();
+                            });
+                        }else{
+                            alertx("删除供应商失败" + "<div style='color:#ff0000;'>" + res.errorMsg + "</div>");
+                        }
+                   });
+               })
+           })
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/admin/finance/financeEdit.html",title:"新增供应商"});
+        })
+        $("#downLoadExcel").click(function(){
+            list.toExcel("供应商信息");
+        })
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            list.paramet.name = $("#name").val();
+            list.reLoad();
+        })
+    }
+</script>

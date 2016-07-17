@@ -1,0 +1,136 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="name" class="input" type="text" placeholder="课程名称"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+        </div>
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+        	{CH: "课程缩略图", EN: "imgUrl",Align:"center",htmlFormat: "<div style='height:60px;overflow:hidden;'><img width='90' src='{imgUrl}' /></div>"},
+            {CH: "课程名称", EN: "name",Align:"center"},
+            {CH: "课程分类", EN: "category",Align:"center"},
+            {CH: "上传时间", EN: "createTime",Align:"center"},
+            {CH: "截止时间", EN: "endTime",Align:"center"},
+            {CH: "审核状态", EN: "checkStatus",Align:"center",Option:{"1":"未审核","2":"通过","3":"<div class='showReason'><span>未通过</span><br /><font>查看理由</font></div>"},OptionExcel:{"1":"未审核","2":"通过","3":"未通过"}}
+        ];
+        var list = new List(webIP + "/api/course/v0.1/list", option, config);
+        list.btns = "<span class=\"listEdit bg_dfba49\">修改</span><span class=\"listDelete bg_f11c1c\">删除</span>";
+        list.load(function () {
+            $("tr").each(function(i){
+                if(i > 0){
+                    var data = JSON.parse($(this).attr("data"));
+                    //查看未通过理由
+                    $(this).find(".showReason").click(function(){
+                        if(data.reason) alertx(data.reason);
+                    })
+                    if(data.status != ""){
+                        //上架
+                        var statusBtn = "";
+                        if(data.status == 1){
+                            data.status = 2;
+                            statusBtn = "<span title='上架' style='background:url(images/icon_up.png) no-repeat;color:rgba(255,255,255,0);' class='statusBtn'>上架</span>"
+                        }else{
+                            data.status = 1;
+                            statusBtn = "<span title='下架' style='background:url(images/icon_up_active.png) no-repeat;color:rgba(255,255,255,0);' class='statusBtn'>下架</span>"
+                        }
+                        $(this).find(".tdBtns").append(statusBtn);
+                        $(this).find(".statusBtn").click(function(){
+                            var ajax = new Ajax(webIP + "/api/course/v0.1/shelve");
+                            ajax.meth = "PUT";
+                            ajax.data = {courseId:data.courseId,status:data.status};
+                            ajax.do(function(res){
+                                if(res && res.result){
+                                    alertx("操作成功",function(){
+                                        list.load();
+                                    });
+                                }else{
+                                    alertx("操作失败," + res.errorMsg);
+                                }
+                            });
+                        })
+                    }
+                }
+            })
+            //修改学校信息
+            $(".listEdit").click(function(){
+                open({url:"modules/supplier/course/courseEdit.html",title:"编辑课程",data:{id:JSON.parse($(this).parents("tr").attr("data")).courseId}});
+            });
+            //删除学校信息
+            $(".listDelete").click(function(){
+                var id = JSON.parse($(this).parents("tr").attr("data")).courseId;
+                confirmx("确定要删除吗？",function(){
+                    var ajax = new Ajax(webIP + "/api/course/v0.1/" + id);
+                    ajax.data = {id:id};
+                    ajax.meth = "DELETE";
+                    ajax.loading.msg = "正在删除...";
+                    ajax.do(function(res){
+                        if(res && res.result){
+                            alertx("删除课程成功",function(){
+                                list.load();
+                            });
+                        }else{
+                            alertx("删除课程失败" + "<div style='color:#ff0000;'>" + res.errorMsg + "</div>");
+                        }
+                    });
+                })
+            });
+        });
+        //开始日期
+        var startTime = new Calendar($("#startTime"));
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/supplier/course/courseEdit.html",title:"新增课程"});
+        })
+        $("#downLoadExcel").click(function(){
+            list.toExcel("课程信息");
+        })
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            var name = $("#name").val();
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endDate").val();
+            list.paramet.name = name;
+            list.reLoad();
+        })
+    }
+</script>

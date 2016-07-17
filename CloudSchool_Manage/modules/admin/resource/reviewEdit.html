@@ -1,0 +1,81 @@
+<form class="form">
+    <div class="form_title"><b>资源信息编辑</b><span class="red">(*为必填项)</span></div>
+    <div class="formBox borderLeft borderRight borderBottom">
+        <div class="data width100">
+            <div class="data_title">资源名称</div><input class="input" id="data-name" readOnly="true" type="text" placeholder="请填写资源名"/>
+        </div>
+        <div class="data width100">
+            <div class="data_title">资源分类</div>
+            <span class="data_error">资源分类不能为空</span>
+            <div id="data-category"></div>
+        </div>
+        <div class="data width100">
+            <div class="data_title">关键字</div>
+            <span class="data_error">关键字不能为空</span><input readOnly="true" class="input" id="data-keyword" type="text" placeholder="请填写关键字"/>
+        </div>
+        <div class="data width100"><div class="data_title">缩略图</div>
+            <div style="margin-left: 50px;">
+                <div id="data-imgUrl" type="img"></div>
+            </div>
+        </div>
+        <div class="data width100">
+            <div class="data_title">描述</div>
+            <span class="data_error">描述不能为空</span><textarea id="data-description" readOnly="true" class="input" style="height: 90px;" placeholder="请填写描述"></textarea>
+        </div>
+        <div class="data width100">
+            <div class="data_title">资源文件</div>
+            <span class="data_error">资源文件不能为空</span>
+            <div id="data-resource"></div>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="formBtns alignCenter">
+        <input type="button" id="cancel" value="返回" class="bg_ffffff"/>
+    </div>
+</form>
+<style>
+    #data-imgUrl{
+        width: 100px;
+        height:100px;
+        overflow: hidden;
+    }
+    #data-imgUrl img{
+        width: 100px;
+    }
+    .input{
+        border-color: #fff;
+    }
+    .input:hover{
+        border-color: #fff;
+    }
+</style>
+<script>
+    function load() {
+
+        //绑定表单数据,注意 每个字段的值必须提供val()方法来设置值和获取值,
+        var from = {
+            id : getUrlParam("id"),
+            imgUrl : new Img($("#data-imgUrl"), "<div style='cursor:pointer; background:#e4e4e4; height:100px; width:100px; line-height:100px;text-align:center; color:#ccc;'>上传图标</div>",true),
+            name : $("#data-name"),
+            category : new Linkage($("#data-category"),1,{url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",data:{parentId:1,type:5,pageSize: 10, pageNum: 1},meth:"GET"},"<div class='autoList' vaule='${id}'>$has{id}<b class='listStyle_cicle icon_img'>$listStyle{name}</b><span style='margin-top:10px;float:left;'>${name}</span></div>","id","parentId","name","<input value='请选择' type='text' class='input' style='width:150px;margin-right:10px;' id='num${n}' />",true),
+            keyword : $("#data-keyword"),
+            description : $("#data-description"),
+            resource : new Directory($("#data-resource"),3,true)
+        }
+        //修改的时候根据id加载数据
+        if (from.id) {
+            var ajax = new Ajax(webIP + "/api/resource/v0.1/" + from.id+"/detail");
+            ajax.do(function(res){
+                for(var key in from){
+                    if(typeof(from[key]) == "object" && res[key] != undefined){
+                        from[key].val(res[key]);
+                    }
+                }
+            });
+        }
+        //取消
+        $("#cancel").click(function(){
+            back(-1);
+        });
+    }
+</script>

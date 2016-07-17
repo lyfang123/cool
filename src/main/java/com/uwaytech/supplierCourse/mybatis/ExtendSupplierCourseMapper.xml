@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.supplierCourse.dao.ExtendSupplierCourseMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.supplierCourse.domain.SupplierCourse" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="img_url" property="imgUrl" jdbcType="VARCHAR" />
+    <result column="view_num" property="viewNum" jdbcType="BIGINT" />
+    <result column="collection_num" property="collectionNum" jdbcType="BIGINT" />
+    <result column="course_time" property="courseTime" jdbcType="VARCHAR" />
+    <result column="chapter_num" property="chapterNum" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 前台供应商课程查询 -->
+  <select id="queryCourseList" resultMap="BaseResultMap"
+          parameterType="com.uwaytech.supplierCourse.domain.SupplierCourseParam" >
+    select id,name,description,img_url,view_num,
+    (select count(t1.id) from collection t1 where t1.cell_id = t.id) as collection_num,
+    course_time,chapter_num
+    from supplier_course t
+    <where>
+      1=1
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != checkStatus">
+        and t.check_status = #{checkStatus}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    <if test="null != type">
+      <if test="1 == type">
+        order by t.view_num desc
+      </if>
+      <if test="2 == type">
+        order by t.create_time desc
+      </if>
+    </if>
+  </select>
+
+  <!-- 前台供应商课程分类统计  -->
+  <select id="queryCategoryList" resultType="com.uwaytech.supplierCourse.ctrl.dto.CategoryInfo"
+          parameterType="com.uwaytech.supplierCourse.domain.SupplierCourseParam" >
+    select sum(res.counts) as counts,res.parent_id as categoryId, t2.name as categoryName from (
+    select count(t.id) as counts,t1.id as category_id, t1.parent_id, t1.name
+    from supplier_course t left join category t1 on t.category_id = t1.id
+    <where>
+      1=1
+      <if test="null != status">
+        and t.status = #{status}
+      </if>
+      <if test="null != name and '' != name">
+        and LOWER(t.name) like CONCAT('%',#{name},'%')
+      </if>
+      <if test="null != checkStatus">
+        and t.check_status = #{checkStatus}
+      </if>
+      <if test="null != categoryId">
+        and t.category_id like CONCAT('%',#{categoryId},'%')
+      </if>
+    </where>
+    group by t1.id) res left join category t2 on res.parent_id = t2.id
+    group by res.parent_id
+
+  </select>
+</mapper>

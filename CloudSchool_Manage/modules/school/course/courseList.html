@@ -1,0 +1,135 @@
+<div class="list_header">
+    <div class="list_header_form">
+        <div class="search">
+            <input id="name" class="input" type="text" placeholder="课程名称"/>
+            <input id="startTime" class="input" type="text" placeholder="开始时间"/>
+            <input id="endTime" class="input" type="text" placeholder="结束时间"/><input type="button" value="" id="searchBtn" class="bg_00b7ee"/>
+        </div>
+        <input type="button" value="+ 新增" id="addBtn" class="bg_00b7ee"/>
+        <input id="downLoadExcel" type="button" value="导出结果" class="bg_00b7ee"/>
+        <div class="clear"></div>
+    </div>
+</div>
+<div class="table">
+    <div id="table"></div>
+</div>
+<div class="list_footer">
+    <div id="pagaBtns"></div>
+</div>
+<script type="text/javascript">
+    function load() {
+        var option = {pageSize: 10, pageNum: 1};
+        var config = [
+        	{CH: "课程缩略图", EN: "imgUrl",Align:"center",htmlFormat: "<div style='height:60px;overflow:hidden;'><img width='90' src='{imgUrl}' /></div>"},
+            {CH: "课程名称", EN: "name",Align:"center"},
+            {CH: "上传时间", EN: "createTime",Align:"center"},
+            {CH: "截止时间", EN: "endTime",Align:"center"},
+            {CH: "授课对象", EN: "type",Align:"center",Option:{"1":"全体学生","2":"全体老师"},OptionExcel:{"1":"全体学生","2":"全体老师"}},
+            {CH: "课程分类", EN: "category",Align:"center"}
+        ];
+        var list = new List(webIP + "/api/course/v0.1/list", option, config);
+        list.btns = "<span class=\"listEdit bg_dfba49\">修改</span><span class=\"listDelete bg_f11c1c\">删除</span>";
+        list.load(function () {
+            $("tr").each(function(i){
+                if(i > 0){
+                    var data = JSON.parse($(this).attr("data"));
+                    //推荐
+                    if(data.recommend != ""){
+                        //上架
+                        var recommendBtn = "";
+                        if(data.recommend == 1){
+                            data.recommend = 2;
+                            recommendBtn = "<span title='推荐' style='background:url(images/icon_recommend.png) no-repeat;color:rgba(255,255,255,0);' class='recommendBtn'>推荐</span>"
+                        }else{
+                            data.recommend = 1;
+                            recommendBtn = "<span title='取消推荐' style='background:url(images/icon_recommend_active.png) no-repeat;color:rgba(255,255,255,0);' class='recommendBtn'>推荐</span>"
+                        }
+                        $(this).find(".tdBtns").append(recommendBtn);
+                        $(this).find(".recommendBtn").click(function(){
+                            var ajax = new Ajax(webIP + "/api/course/v0.1/recommend");
+                            ajax.meth = "PUT";
+                            ajax.data = {courseId:data.courseId,recommend:data.recommend};
+                            ajax.do(function(res){
+                                if(res && res.result){
+                                    alertx("操作成功",function(){
+                                        list.load();
+                                    });
+                                }else{
+                                    alertx("操作失败," + res.errorMsg);
+                                }
+                            });
+                        })
+                    }
+                }
+            })
+            //修改学校信息
+            $(".listEdit").click(function(){
+                open({url:"modules/school/course/courseEdit.html",title:"编辑课程",data:{id:JSON.parse($(this).parents("tr").attr("data")).courseId}});
+            });
+            //删除学校信息
+            $(".listDelete").click(function(){
+                var id = JSON.parse($(this).parents("tr").attr("data")).courseId;
+                confirmx("确定要删除吗？",function(){
+                    var ajax = new Ajax(webIP + "/api/course/v0.1/" + id);
+                    ajax.data = {id:id};
+                    ajax.meth = "DELETE";
+                    ajax.loading.msg = "正在删除...";
+                    ajax.do(function(res){
+                        if(res && res.result){
+                            alertx("删除课程成功",function(){
+                                list.load();
+                            });
+                        }else{
+                            alertx("删除课程失败" + "<div style='color:#ff0000;'>" + res.errorMsg + "</div>");
+                        }
+                    });
+                })
+            });
+        });
+        //开始日期
+        var startTime = new Calendar($("#startTime"));
+        $("#startTime").val("");
+        $("#startTime").focus(function () {
+            var _this = $(this);
+            startTime.open(function (d) {
+                _this.val(d);
+                startTime.close();
+            });
+        });
+        //结束日期
+        var endTime = new Calendar($("#endTime"));
+        $("#endTime").val("");
+        $("#endTime").focus(function () {
+            var _this = $(this);
+            endTime.open(function (d) {
+                _this.val(d);
+                endTime.close();
+            });
+        });
+        //新增
+        $("#addBtn").click(function(){
+            open({url:"modules/school/course/courseEdit.html",title:"新增课程"});
+        })
+        $("#downLoadExcel").click(function(){
+            list.toExcel("课程信息");
+        })
+        //搜索
+        var isBindKeyup = false;
+        $(".search").click(function(){
+            if(!isBindKeyup){
+                isBindKeyup = true;
+                $(window).bind("keyup",function(e){
+                    if(e.which == 13 && !list.isLoading) $("#searchBtn").click();
+                })
+            }
+        })
+        // 搜索
+        $("#searchBtn").click(function() {
+            var name = $("#name").val();
+            list.paramet.startTime = $("#startTime").val();
+            list.paramet.endTime = $("#endDate").val();
+            list.paramet.name = name;
+            list.reLoad();
+        })
+    }
+</script>

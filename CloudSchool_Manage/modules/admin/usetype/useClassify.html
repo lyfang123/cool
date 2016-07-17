@@ -1,0 +1,228 @@
+<div id="classifyBox">
+    <div id='classifyBox_1' class="classifyBox">
+    <div class="classifyBox_t"><span>应用类型分类</span></div>
+        <div class="classifyBox_c"></div>
+    </div>
+    <div id='classifyBox_2' class="classifyBox">
+        <div class="classifyBox_t"><span>应用类型分类</span><span class="nav"></span></div>
+        <div class="classifyBox_c"></div>
+    </div>
+    <div id='classifyBox_3' class="classifyBox">
+        <div class="classifyBox_t"><span>应用类型分类</span><span class="nav"></span></div>
+        <div class="classifyBox_c"></div>
+    </div>
+</div>
+<style type="text/css">
+    #classifyBox{
+        margin:10px;
+    }
+    .classifyBox{
+        width: 260px; 
+        float: left;
+        border: 1px solid #e4e4e4;
+        border-radius: 5px;
+        margin-right: 20px;
+        min-height: 79px;
+        display: none;
+        margin-bottom: 20px;
+    }
+    .classifyBox_t{
+        line-height: 40px;
+        border-bottom: 1px dashed #e4e4e4;
+    }
+    .classifyBox_t span{
+        margin-left: 10px;
+    }
+    .treeNode_self{
+        text-align:right;
+        height:40px; 
+        line-height:40px;
+    }
+    .treeNode_name{
+        float:left;
+        margin-left:10px;
+        cursor:pointer;
+    }
+    .treeNode_self .listBtns{
+        margin-right:10px;
+        cursor:pointer;
+    }
+    .treeNode_self.active{
+        background: #f4f4f4;
+    }
+    .treeNode_child{
+        margin-left:20px;
+    }
+    .listAdd{
+        line-height: 40px;
+        text-align: center;
+        color: #19b0e0;
+        cursor:pointer;
+        border-top: 1px solid #e4e4e4;
+    }
+</style>
+<script type="text/javascript">
+    function load(){
+        var levelConfig = [{
+            url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",
+            meth:"GET",
+            idKey:"id",
+            pidKey:"parentId",
+            req:{parentId:1,type:1,pageSize: 10000, pageNum: 1},
+            res:{
+                obj:$("#classifyBox_1 .classifyBox_c").eq(0),
+                clickBox:"treeNode_name",
+                activeClass:"treeNode_self_active",
+                childBox:"treeNode_child",
+                add:{
+                    btnClass:"listAdd",
+                    url:webIP + "/api/cus/category/v0.1/${type}",
+                    meth:"POST",
+                    req:{},
+                    res:{successKey:"result"},
+                    html:"<div class='listAdd'>+ 添加分类</div>"
+                },
+                edit:{
+                    btnClass:"listEdit",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"PUT",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                delete:{
+                    btnClass:"listDelete",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"DELETE",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                beforeFn:function(){
+                    $("#classifyBox_1").show();
+                },
+                endFn:function(){
+                    $("#classifyBox_2,#classifyBox_3").hide();
+                },
+                editBtn:"listEdit",
+                deleteBtn:"listDelete",
+                html:"<div class='treeNode'><div class='treeNode_self'><span class='treeNode_name'>${name}</span><span class='listEdit listBtns'>编</span><span class='listDelete listBtns'>删</span></div></div>",
+                style:""
+            }
+        },
+        {
+            url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",
+            meth:"GET",
+            idKey:"id",
+            pidKey:"parentId",
+            req:{parentId:1,type:1},
+            res:{
+                obj:$("#classifyBox_2 .classifyBox_c").eq(0),
+                clickBox:"treeNode_name",
+                activeClass:"treeNode_self_active",
+                childBox:"treeNode_child",
+                add:{
+                    btnClass:"listAdd",
+                    url:webIP + "/api/cus/category/v0.1/${type}",
+                    meth:"POST",
+                    req:{},
+                    res:{successKey:"result"},
+                    html:"<div class='listAdd'>+ 添加分类</div>"
+                },
+                edit:{
+                    btnClass:"listEdit",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"PUT",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                delete:{
+                    btnClass:"listDelete",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"DELETE",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                beforeFn:function(obj){
+                    $("#classifyBox_2").show();
+                },
+                endFn:function(){
+                    $("#classifyBox_3").hide();
+                },
+                editBtn:"listEdit",
+                deleteBtn:"listDelete",
+                html:"<div class='treeNode'><div class='treeNode_self'><span class='treeNode_name'>${name}</span><span class='listEdit listBtns'>编</span><span class='listDelete listBtns'>删</span></div></div>",
+                style:""
+            }
+        },
+        {
+            url:webIP + "/api/cus/category/v0.1/${type}/pid/${parentId}",
+            meth:"GET",
+            idKey:"id",
+            pidKey:"parentId",
+            req:{parentId:1,type:1},
+            res:{
+                obj:$("#classifyBox_3 .classifyBox_c").eq(0),
+                clickBox:"treeNode_name",
+                activeClass:"treeNode_self_active",
+                childBox:"treeNode_child",
+                add:{
+                    btnClass:"listAdd",
+                    url:webIP + "/api/cus/category/v0.1/${type}",
+                    meth:"POST",
+                    req:{},
+                    res:{successKey:"result"},
+                    html:"<div class='listAdd'>+ 添加分类</div>"
+                },
+                edit:{
+                    btnClass:"listEdit",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"PUT",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                delete:{
+                    btnClass:"listDelete",
+                    url:webIP + "/api/cus/category/v0.1/${type}/${id}",
+                    meth:"DELETE",
+                    req:{},
+                    res:{successKey:"result"}
+                },
+                beforeFn:function(obj){
+                    $("#classifyBox_3").show();
+                },
+                endFn:function(){},
+                editBtn:"listEdit",
+                deleteBtn:"listDelete",
+                html:"<div class='treeNode'><div class='treeNode_self'><span class='treeNode_name'>${name}</span><span class='listEdit listBtns'>编</span><span class='listDelete listBtns'>删</span></div></div>",
+                style:""
+            }
+        }];
+        var dataModel = {
+            id:{primary:true},
+            name:{
+                input:{
+                    title:"名称",
+                    html:"<input vaule='' id='dataModel_name' type='text' style='border:1px solid #e4e4e4;height:25px;padding:0px 3px;' />",
+                    init:function(){
+
+                    },
+                    val:function(){
+                        var vaule = $("#dataModel_name").val();
+                        if(!vaule){
+                            return {result:false,msg:"名称不能为空"};
+                        }else{
+                            return {result:true,vaule:vaule};
+                        }
+                    }
+                }
+            },
+            sort:{},
+            parentId:{},
+            type:{vaule:1}
+        }
+        var classify = new Classify($("#classifyBox_1 .classifyBox_c").eq(0),1,true);
+        classify.levelConfig = levelConfig;
+        classify.dataModel = dataModel;
+        classify.levelMax = 3;
+        classify.load();
+    }
+</script>

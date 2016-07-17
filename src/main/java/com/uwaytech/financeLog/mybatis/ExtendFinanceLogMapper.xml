@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.financeLog.dao.ExtendFinanceLogMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.financeLog.domain.FinanceLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="finance_id" property="financeId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="order_code" property="orderCode" jdbcType="VARCHAR" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="e_coin" property="eCoin" jdbcType="DECIMAL" />
+    <result column="bank_number" property="bankNumber" jdbcType="VARCHAR" />
+    <result column="deal_date" property="dealDate" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="BIGINT" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="grouping" property="grouping" />
+  </resultMap>
+
+  <!-- 查询学校入账记录列表 -->
+  <select id="queryFinanceLogList" parameterType="com.uwaytech.financeLog.domain.FinanceLogParam" resultMap="BaseResultMap">
+    select t1.id,t1.pay_type,t1.order_code,t1.money,t1.e_coin,t1.create_time,t1.bank_number,t2.grouping
+    from finance_log t1 left join finance t2 on t1.finance_id = t2.id
+    <where>
+      1=1
+      <if test="null != schoolId">
+        and t2.grouping = #{schoolId}
+      </if>
+      <if test="null != startTime">
+        <![CDATA[
+    and DATE_FORMAT(t1.create_time, '%Y-%m-%d') >=  DATE_FORMAT(#{startTime}, '%Y-%m-%d')
+    ]]>
+      </if>
+      <if test="null != endTime">
+        <![CDATA[
+    and DATE_FORMAT(t1.create_time, '%Y-%m-%d') <=  DATE_FORMAT(#{endTime}, '%Y-%m-%d')
+    ]]>
+      </if>
+      <if test="null != payType">
+        and t1.pay_type = #{payType}
+      </if>
+      <if test="null != type">
+        and t1.type = #{type}
+      </if>
+    </where>
+  </select>
+
+  <!-- 查询学校入账总额 -->
+  <select id="queryFinanceLogEcoins" parameterType="com.uwaytech.financeLog.domain.FinanceLogParam" resultType="java.lang.Long">
+    select sum(t1.e_coin) as ecoins,t2.grouping
+    from finance_log t1 left join finance t2 on t1.finance_id = t2.id
+    <where>
+      1=1
+      <if test="null != schoolId">
+        and t2.grouping = #{schoolId}
+      </if>
+      <if test="null != startTime">
+        <![CDATA[
+    and DATE_FORMAT(t1.create_time, '%Y-%m-%d') >=  DATE_FORMAT(#{startTime}, '%Y-%m-%d')
+    ]]>
+      </if>
+      <if test="null != endTime">
+        <![CDATA[
+    and DATE_FORMAT(t1.create_time, '%Y-%m-%d') <=  DATE_FORMAT(#{endTime}, '%Y-%m-%d')
+    ]]>
+      </if>
+      <if test="null != payType">
+        and t1.pay_type = #{payType}
+      </if>
+      <if test="null != type">
+        and t1.type = #{type}
+      </if>
+    </where>
+  </select>
+</mapper>

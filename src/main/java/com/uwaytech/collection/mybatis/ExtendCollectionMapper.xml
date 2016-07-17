@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uwaytech.collection.dao.ExtendCollectionMapper">
+  <resultMap id="collectionMap" type="com.uwaytech.collection.domain.CollectionInfo">
+    <result property="collectionId" column="id" />
+    <result property="cellId" column="cell_id" />
+    <result property="cellName" column="name" />
+    <result property="imgUrl" column="img_url" />
+    <result property="type" column="type" />
+  </resultMap>
+
+  <select id="getResourceCollection" resultMap="collectionMap">
+    (SELECT t.id,t.cell_id,t1.name,t1.img_url, 1 AS type FROM supplier_resource t1
+    LEFT JOIN collection t ON t1.id = t.cell_id
+    WHERE t.user_id = #{userId} AND t.type = #{type})
+    UNION
+    (SELECT tt.id,tt.cell_id,t2.name,t2.img_url, 2 AS type FROM school_resource t2
+    LEFT JOIN collection tt ON t2.id = tt.cell_id
+    WHERE tt.user_id = #{userId} AND tt.type = #{type})
+  </select>
+
+  <select id="getCourseCollection" resultMap="collectionMap">
+    (SELECT t.id,t.cell_id,t1.name,t1.img_url, 1 AS type FROM supplier_course t1
+    LEFT JOIN collection t ON t1.id = t.cell_id
+    WHERE t.user_id = #{userId} AND t.type = #{type})
+    UNION
+    (SELECT tt.id,tt.cell_id,t2.name,t2.img_url, 2 AS type FROM school_course t2
+    LEFT JOIN collection tt ON t2.id = tt.cell_id
+    WHERE tt.user_id = #{userId} AND tt.type = #{type})
+  </select>
+</mapper>

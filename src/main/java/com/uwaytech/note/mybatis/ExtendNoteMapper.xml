@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.note.dao.ExtendNoteMapper" >
+  <resultMap id="NoteResultMap" type="com.uwaytech.note.domain.NoteInfo" >
+    <result column="user_id" property="noteId"  />
+    <result column="course_id" property="courseId"  />
+    <result column="material_id" property="materialId"  />
+    <result column="title" property="title"  />
+    <result column="note" property="note"  />
+    <result column="update_time" property="updateTime"  />
+    <result column="name" property="courseName"  />
+    <result column="img_url" property="imgUrl"  />
+    <result column="type" property="type"  />
+  </resultMap>
+
+  <select id="getNoteList" parameterType="java.lang.Long" resultMap="NoteResultMap">
+    (SELECT t.name,t.img_url,t1.course_id,t1.id,t1.material_id,t1.note,t1.title,t1.update_time,1 AS type
+    FROM supplier_course t
+    LEFT JOIN note t1 ON t1.course_id = t.id
+    WHERE t1.user_id = #{userId})
+    <if test="courseId != null">
+      AND t1.course_id = #{courseId}
+    </if>)
+    UNION
+    (SELECT tt.name,tt.img_url,t2.course_id,t2.id,t2.material_id,t2.note,t2.title,t2.update_time,2 AS type
+    FROM school_course tt
+    LEFT JOIN note t2 ON t2.course_id = tt.id
+    WHERE t2.user_id = #{userId}
+    <if test="courseId != null">
+      AND t2.course_id = #{courseId}
+    </if>)
+  </select>
+</mapper>

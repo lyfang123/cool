@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.financeLog.dao.FinanceLogMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.financeLog.domain.FinanceLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="pay_type" property="payType" jdbcType="INTEGER" />
+    <result column="finance_id" property="financeId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="order_code" property="orderCode" jdbcType="VARCHAR" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="e_coin" property="eCoin" jdbcType="DECIMAL" />
+    <result column="bank_number" property="bankNumber" jdbcType="VARCHAR" />
+    <result column="deal_date" property="dealDate" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, finance_id, type, order_code, money, e_coin, bank_number, deal_date, create_time, 
+    create_user, pay_type
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.uwaytech.financeLog.domain.FinanceLogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from finance_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from finance_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from finance_log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.uwaytech.financeLog.domain.FinanceLogExample" >
+    delete from finance_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.uwaytech.financeLog.domain.FinanceLog" >
+    insert into finance_log (id, finance_id, type, 
+      order_code, money, e_coin, 
+      bank_number, deal_date, create_time, 
+      create_user,pay_type)
+    values (#{id,jdbcType=BIGINT}, #{financeId,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, 
+      #{orderCode,jdbcType=VARCHAR}, #{money,jdbcType=DECIMAL}, #{eCoin,jdbcType=DECIMAL}, 
+      #{bankNumber,jdbcType=VARCHAR}, #{dealDate,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{createUser,jdbcType=BIGINT},#{payType,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.uwaytech.financeLog.domain.FinanceLog" >
+    insert into finance_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="financeId != null" >
+        finance_id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="orderCode != null" >
+        order_code,
+      </if>
+      <if test="money != null" >
+        money,
+      </if>
+      <if test="eCoin != null" >
+        e_coin,
+      </if>
+      <if test="bankNumber != null" >
+        bank_number,
+      </if>
+      <if test="dealDate != null" >
+        deal_date,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="createUser != null" >
+        create_user,
+      </if>
+      <if test="payType != null" >
+        pay_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="financeId != null" >
+        #{financeId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="orderCode != null" >
+        #{orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="money != null" >
+        #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="eCoin != null" >
+        #{eCoin,jdbcType=DECIMAL},
+      </if>
+      <if test="bankNumber != null" >
+        #{bankNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="dealDate != null" >
+        #{dealDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createUser != null" >
+        #{createUser,jdbcType=BIGINT},
+      </if>
+      <if test="payType != null" >
+        #{payType,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.uwaytech.financeLog.domain.FinanceLogExample" resultType="java.lang.Integer" >
+    select count(*) from finance_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update finance_log
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.financeId != null" >
+        finance_id = #{record.financeId,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null" >
+        type = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.orderCode != null" >
+        order_code = #{record.orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.money != null" >
+        money = #{record.money,jdbcType=DECIMAL},
+      </if>
+      <if test="record.eCoin != null" >
+        e_coin = #{record.eCoin,jdbcType=DECIMAL},
+      </if>
+      <if test="record.bankNumber != null" >
+        bank_number = #{record.bankNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dealDate != null" >
+        deal_date = #{record.dealDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.createUser != null" >
+        create_user = #{record.createUser,jdbcType=BIGINT},
+      </if>
+      <if test="record.payType != null" >
+        pay_type = #{record.payType,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update finance_log
+    set id = #{record.id,jdbcType=BIGINT},
+      finance_id = #{record.financeId,jdbcType=BIGINT},
+      type = #{record.type,jdbcType=INTEGER},
+      order_code = #{record.orderCode,jdbcType=VARCHAR},
+      money = #{record.money,jdbcType=DECIMAL},
+      e_coin = #{record.eCoin,jdbcType=DECIMAL},
+      bank_number = #{record.bankNumber,jdbcType=VARCHAR},
+      deal_date = #{record.dealDate,jdbcType=TIMESTAMP},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      create_user = #{record.createUser,jdbcType=BIGINT},
+      pay_type = #{record.payType,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.uwaytech.financeLog.domain.FinanceLog" >
+    update finance_log
+    <set >
+      <if test="financeId != null" >
+        finance_id = #{financeId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="orderCode != null" >
+        order_code = #{orderCode,jdbcType=VARCHAR},
+      </if>
+      <if test="money != null" >
+        money = #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="eCoin != null" >
+        e_coin = #{eCoin,jdbcType=DECIMAL},
+      </if>
+      <if test="bankNumber != null" >
+        bank_number = #{bankNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="dealDate != null" >
+        deal_date = #{dealDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createUser != null" >
+        create_user = #{createUser,jdbcType=BIGINT},
+      </if>
+      <if test="payType != null" >
+        pay_type = #{payType,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.uwaytech.financeLog.domain.FinanceLog" >
+    update finance_log
+    set finance_id = #{financeId,jdbcType=BIGINT},
+      type = #{type,jdbcType=INTEGER},
+      order_code = #{orderCode,jdbcType=VARCHAR},
+      money = #{money,jdbcType=DECIMAL},
+      e_coin = #{eCoin,jdbcType=DECIMAL},
+      bank_number = #{bankNumber,jdbcType=VARCHAR},
+      deal_date = #{dealDate,jdbcType=TIMESTAMP},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      create_user = #{createUser,jdbcType=BIGINT},
+      pay_type = #{payType,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

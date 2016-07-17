@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.uwaytech.downloadLog.dao.DownloadLogMapper" >
+  <resultMap id="BaseResultMap" type="com.uwaytech.downloadLog.domain.DownloadLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="grouping" property="grouping" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="user_dept" property="userDept" jdbcType="VARCHAR" />
+    <result column="resouse_id" property="resouseId" jdbcType="BIGINT" />
+    <result column="finance_log_id" property="financeLogId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="school_name" property="schoolName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, grouping, user_id, user_name, user_dept, resouse_id, finance_log_id, create_time, 
+    school_name
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.uwaytech.downloadLog.domain.DownloadLogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from download_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from download_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from download_log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.uwaytech.downloadLog.domain.DownloadLogExample" >
+    delete from download_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.uwaytech.downloadLog.domain.DownloadLog" >
+    insert into download_log (id, grouping, user_id, 
+      user_name, user_dept, resouse_id, 
+      finance_log_id, create_time, school_name
+      )
+    values (#{id,jdbcType=BIGINT}, #{grouping,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, 
+      #{userName,jdbcType=VARCHAR}, #{userDept,jdbcType=VARCHAR}, #{resouseId,jdbcType=BIGINT}, 
+      #{financeLogId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{schoolName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.uwaytech.downloadLog.domain.DownloadLog" >
+    insert into download_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="grouping != null" >
+        grouping,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="userDept != null" >
+        user_dept,
+      </if>
+      <if test="resouseId != null" >
+        resouse_id,
+      </if>
+      <if test="financeLogId != null" >
+        finance_log_id,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="schoolName != null" >
+        school_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="grouping != null" >
+        #{grouping,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="userDept != null" >
+        #{userDept,jdbcType=VARCHAR},
+      </if>
+      <if test="resouseId != null" >
+        #{resouseId,jdbcType=BIGINT},
+      </if>
+      <if test="financeLogId != null" >
+        #{financeLogId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="schoolName != null" >
+        #{schoolName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.uwaytech.downloadLog.domain.DownloadLogExample" resultType="java.lang.Integer" >
+    select count(*) from download_log
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update download_log
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.grouping != null" >
+        grouping = #{record.grouping,jdbcType=BIGINT},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.userName != null" >
+        user_name = #{record.userName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userDept != null" >
+        user_dept = #{record.userDept,jdbcType=VARCHAR},
+      </if>
+      <if test="record.resouseId != null" >
+        resouse_id = #{record.resouseId,jdbcType=BIGINT},
+      </if>
+      <if test="record.financeLogId != null" >
+        finance_log_id = #{record.financeLogId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.schoolName != null" >
+        school_name = #{record.schoolName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update download_log
+    set id = #{record.id,jdbcType=BIGINT},
+      grouping = #{record.grouping,jdbcType=BIGINT},
+      user_id = #{record.userId,jdbcType=BIGINT},
+      user_name = #{record.userName,jdbcType=VARCHAR},
+      user_dept = #{record.userDept,jdbcType=VARCHAR},
+      resouse_id = #{record.resouseId,jdbcType=BIGINT},
+      finance_log_id = #{record.financeLogId,jdbcType=BIGINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      school_name = #{record.schoolName,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.uwaytech.downloadLog.domain.DownloadLog" >
+    update download_log
+    <set >
+      <if test="grouping != null" >
+        grouping = #{grouping,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="userDept != null" >
+        user_dept = #{userDept,jdbcType=VARCHAR},
+      </if>
+      <if test="resouseId != null" >
+        resouse_id = #{resouseId,jdbcType=BIGINT},
+      </if>
+      <if test="financeLogId != null" >
+        finance_log_id = #{financeLogId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="schoolName != null" >
+        school_name = #{schoolName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.uwaytech.downloadLog.domain.DownloadLog" >
+    update download_log
+    set grouping = #{grouping,jdbcType=BIGINT},
+      user_id = #{userId,jdbcType=BIGINT},
+      user_name = #{userName,jdbcType=VARCHAR},
+      user_dept = #{userDept,jdbcType=VARCHAR},
+      resouse_id = #{resouseId,jdbcType=BIGINT},
+      finance_log_id = #{financeLogId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      school_name = #{schoolName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

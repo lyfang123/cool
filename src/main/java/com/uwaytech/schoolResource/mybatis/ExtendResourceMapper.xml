@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uwaytech.schoolResource.dao.ExtendResourceMapper">
+
+  <resultMap id="SupplierResultMap" type="com.uwaytech.schoolResource.domain.SupplierResourceResult">
+    <result column="id"  property="id" />
+    <result column="name"  property="name" />
+    <result column="total" property="total" />
+    <result column="downloadNum" property="downloadNum" />
+    <result column="eCoin" property="eCoin" />
+  </resultMap>
+
+  <resultMap id="DownloadMap" type="com.uwaytech.schoolResource.domain.DownloadInfo">
+    <result column="number"  property="number" />
+    <result column="eCoin" property="eCoin" />
+  </resultMap>
+
+  <resultMap id="SupplierResourceDetail" type="com.uwaytech.schoolResource.domain.SupplierResourceDetail">
+    <result column="id"  property="resourceId" />
+    <result column="name"  property="name" />
+    <result column="img_url"  property="imgUrl" />
+    <result column="description"  property="description" />
+    <result column="e_coin" property="eCoin" />
+    <result column="downloadNum" property="downloadNum" />
+    <result column="eCoins" property="eCoins" />
+    <result column="create_time" property="createTime" />
+    <association column="category_id" property="category"  select="categoryList"/>
+    <association column="mediaType" property="mediaType"  select="cusCategoryList"/>
+    <association column="useType" property="useType"  select="cusCategoryList"/>
+    <association column="id" property="material" select="findMaterial" />
+  </resultMap>
+
+  <resultMap id="SchoolResourceDetail" type="com.uwaytech.schoolResource.domain.SupplierResourceDetail">
+    <result column="id"  property="resourceId" />
+    <result column="name"  property="name" />
+    <result column="img_url"  property="imgUrl" />
+    <result column="description"  property="description" />
+    <result column="e_coin" property="eCoin" />
+    <result column="downloadNum" property="downloadNum" />
+    <result column="eCoins" property="eCoins" />
+    <result column="create_time" property="createTime" />
+    <association column="category_id" property="category"  select="cusCategoryList"/>
+    <association column="id" property="material" select="findMaterial" />
+  </resultMap>
+
+  <resultMap id="ResourceList" type="com.uwaytech.schoolResource.domain.ResourceListResult">
+    <result column="id"  property="resourceId" />
+    <result column="name"  property="name" />
+    <result column="category"  property="category" />
+    <result column="img_url"  property="imgUrl" />
+    <result column="e_coin" property="eCoin" />
+    <result column="downloadNum" property="downloadNum" />
+    <result column="eCoins" property="eCoins" />
+    <result column="create_time" property="createTime" />
+    <result column="check_status" property="checkStatus" />
+    <result column="status" property="status" />
+    <result column="recommend" property="recommend"/>
+    <result column="reason" property="reason" />
+  </resultMap>
+
+  <resultMap id="ResourceMaterial" type="com.uwaytech.schoolCourse.domain.MaterialEntity">
+    <result property="dataId" column="id" />
+    <result property="materialId" column="material_id" />
+    <result property="name" column="name" />
+    <result property="title" column="title" />
+  </resultMap>
+
+  <resultMap id="ResMaterial" type="com.uwaytech.schoolResource.domain.ResourceMaterial">
+    <result property="materialId" column="material_id" />
+    <result property="name" column="name" />
+    <result property="title" column="title" />
+  </resultMap>
+
+
+  <resultMap id="Category" type="com.uwaytech.schoolCourse.domain.CourseCategory">
+    <result property="id" column="id" />
+    <result property="name" column="name" />
+  </resultMap>
+
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, grouping, name, category_id, e_coin, type, media_type, use_type, img_url, check_status, 
+    status, reason, description, create_time
+  </sql>
+
+  <insert id="insertResourceMaterial" parameterType="com.uwaytech.schoolResource.domain.ResourceMaterial">
+    INSERT INTO resource_material
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="resourceId != null" >
+        resource_id,
+      </if>
+      <if test="materialId != null" >
+        material_id,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="resourceId != null" >
+        #{resourceId,jdbcType=BIGINT},
+      </if>
+      <if test="materialId != null" >
+        #{materialId,jdbcType=BIGINT},
+      </if>
+      <if test="title != null" >
+        #{title},
+      </if>
+      <if test="name != null" >
+        #{name},
+      </if>
+    </trim>
+  </insert>
+
+  <select id="findSupplierResourceList" resultMap="ResourceList">
+    SELECT t.id,t.name,t1.name AS category,t.e_coin,t.create_time,t.check_status,t.status,t.img_url,t.reason,
+    COUNT(tt.resouse_id) AS downloadNum,COUNT(tt.resouse_id)*t.e_coin AS eCoins,t.recommend
+    FROM supplier_resource t
+    LEFT JOIN download_log tt ON t.id = tt.resouse_id
+    LEFT JOIN category t1 ON t.category_id = t1.id
+    WHERE t.status != -1
+    <if test="groupId != null">
+      AND  t.supplier_id = #{groupId}
+    </if>
+    <if test="kw != null">
+      AND t.name LIKE CONCAT('%',#{kw},'%')
+    </if>
+    <if test="categoryId != null">
+      AND t.category_id = #{categoryId}
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="checkStatus != null">
+      AND t.check_status = #{checkStatus}
+    </if>
+    <if test="startTime != null">
+      AND t.create_time &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND t.create_time &lt;=  #{endTime}
+    </if>
+    GROUP BY t.id
+  </select>
+
+  <select id="findMaterial" parameterType="java.lang.Long" resultMap="ResourceMaterial">
+    SELECT t.id,t.material_id,t.name,t.title FROM resource_material t
+    WHERE t.resource_id = #{value}
+  </select>
+
+  <select id="findSchoolResourceList" resultMap="ResourceList">
+    SELECT t.id,t.name,t1.name AS category,t.create_time,t.img_url,t.recommend
+    FROM school_resource t
+    LEFT JOIN customer_category t1 ON  t.category_id = t1.id
+    WHERE t.school_id = #{groupId} AND t.status != -1
+    <if test="kw != null">
+      AND t.name LIKE CONCAT('%',#{kw},'%')
+    </if>
+    <if test="categoryId != null">
+      AND t.category_id = #{categoryId}
+    </if>
+    <if test="status != null">
+      AND t.status = #{status}
+    </if>
+    <if test="startTime != null">
+      AND t.create_time &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND t.create_time &lt;=  #{endTime}
+    </if>
+  </select>
+
+  <select id="findSupplierResource" resultMap="SupplierResultMap">
+      SELECT SUM(res.downloadNum) AS downloadNum, SUM(res.eCoin) AS  eCoin,t2.name,t2.id,
+      count(res.id) AS total FROM
+      (SELECT COUNT(tt.id) AS downloadNum,t.supplier_id,t.id,t.e_coin*COUNT(tt.id) AS eCoin
+      FROM supplier_resource t
+      LEFT JOIN download_log tt ON t.id = tt.resouse_id WHERE t.status != -1 GROUP BY t.id) res
+      LEFT JOIN supplier t2 ON t2.id=res.supplier_id
+      GROUP BY t2.id
+  </select>
+
+  <select id="findDownloadInfo" parameterType="java.lang.Long" resultMap="DownloadMap">
+    SELECT COUNT(tt.id) AS downloadNum,SUM(t.e_coin) AS eCoin
+    FROM supplier_resource t
+    LEFT JOIN download_log tt ON t.id = tt.resouse_id
+    LEFT JOIN supplier t1 ON t1.id = t.supplier_id
+    WHERE t.supplier_id = #{supplier}
+  </select>
+
+  <select id="findSchoolResourceDetail" parameterType="java.lang.Long" resultMap="SchoolResourceDetail">
+    SELECT t.id,t.description,t.img_url,t.keyword,t.name,t.category_id,t.create_time
+    FROM school_resource t
+    LEFT JOIN customer_category tt ON t.category_id = tt.id
+    WHERE t.id = #{resourceId}
+  </select>
+
+  <select id="findSupplierResourceDetail" parameterType="java.lang.Long" resultMap="SupplierResourceDetail">
+    SELECT t.id,t.name,t.description,t.e_coin,t.img_url,t1.id AS mediaType,t2.id AS useType,t.category_id
+    FROM supplier_resource t
+    LEFT JOIN category tt ON t.category_id = tt.id
+    LEFT JOIN customer_category t1 ON t.media_type = t1.id
+    LEFT JOIN customer_category t2 ON t.use_type = t2.id
+    WHERE t.id = #{resourceId}
+  </select>
+
+  <select id="categoryList" parameterType="java.lang.Long" resultMap="Category">
+    SELECT t4.id,t4.name FROM category t4 WHERE t4.id =(SELECT t2.parent_id FROM category t2
+    LEFT JOIN category t3 ON t3.parent_id = t2.id WHERE t3.id = #{value})
+    UNION  SELECT t.id,t.name FROM category t LEFT JOIN category t1 ON t1.parent_id = t.id
+    WHERE t1.id = #{value}
+    UNION SELECT tt.id,tt.name FROM category tt WHERE tt.id = #{value}
+  </select>
+
+  <select id="cusCategoryList" parameterType="java.lang.Long" resultMap="Category">
+    SELECT t4.id,t4.name FROM customer_category t4 WHERE t4.id =(SELECT t2.parent_id
+    FROM customer_category t2 LEFT JOIN customer_category t3 ON t3.parent_id = t2.id WHERE t3.id = #{value})
+    UNION SELECT t.id,t.name FROM customer_category t LEFT JOIN customer_category t1 ON t1.parent_id = t.id
+    WHERE t1.id = #{value}
+    UNION SELECT tt.id,tt.name FROM customer_category tt WHERE tt.id = #{value}
+  </select>
+  
+  <update id="updateResourceMaterial" parameterType="Map">
+    UPDATE resource_material
+    <set>
+      <if test="resourceId != null">
+        resource_id = #{resourceId},
+      </if>
+      <if test="materialId != null">
+        material_id = #{materialId},
+      </if>
+    </set>
+    WHERE resource_id = #{resourceId}
+  </update>
+
+  <update id="updateSupplierReadNum" parameterType="java.lang.Long">
+    UPDATE supplier_resource SET read_num = read_num +1 WHERE id =#{courseId}
+  </update>
+
+  <update id="updateSchoolReadNum" parameterType="java.lang.Long">
+    UPDATE school_resource SET read_num = read_num +1 WHERE id =#{courseId}
+  </update>
+
+  <delete id="deleteResourceMaterial" parameterType="java.lang.Long">
+    DELETE FROM resource_material
+    WHERE resource_id = #{resourceId,jdbcType=BIGINT}
+  </delete>
+
+  <select id="findSupplierResourceListByKeyword" resultMap="ResourceList">
+    SELECT tt.id,tt.name,ts.name AS category,tt.e_coin,tt.create_time,tt.check_status,tt.status,tt.img_url,t.reason,
+    COUNT(tr.resouse_id) AS downloadNum,COUNT(tr.resouse_id)*tt.e_coin AS eCoins,tt.recommend
+    FROM supplier_resource tt
+    LEFT JOIN download_log tr ON tt.id = tr.resouse_id
+    LEFT JOIN category ts ON tt.category_id = ts.id
+    WHERE tt.status != -1 AND tt.check_status = 1
+    <if test="groupId != null">
+      AND tt.supplier_id = #{groupId}
+    </if>
+    AND (tt.name LIKE CONCAT('%',#{kw},'%') OR tt.category_id IN (select t.id
+    from category t where t.name like CONCAT('%',#{kw},'%')
+    OR tt.category_id IN (
+    select
+    (select t1.id  from category t1 where t1.parent_id = t2.id ) as id
+    from category t2 where t2.name like CONCAT('%',#{kw},'%'))
+    OR tt.category_id IN (
+    select
+    (select t3.id from customer_category t3 where t3.parent_id in(select t5.id from category t5
+    where t5.parent_id = t4.id)) as id
+    from category t4 where t4.name like CONCAT('%',#{kw},'%'))))
+    GROUP BY tt.id
+  </select>
+
+  <select id="findSchoolResourceListByKeyword" resultMap="ResourceList">
+    SELECT tt.id,tt.name,ts.name AS category,tt.create_time,tt.img_url,tt.recommend
+    FROM school_resource tt
+    LEFT JOIN customer_category ts ON  tt.category_id = ts.id
+    WHERE tt.school_id = #{groupId} AND tt.status != -1
+    AND (tt.name LIKE CONCAT('%',#{name},'%') OR tt.category_id IN (select t.id
+    from customer_category t where t.name like CONCAT('%',#{name},'%')
+    OR tt.category_id IN (
+    select
+    (select t1.id  from customer_category t1 where t1.parent_id = t2.id ) as id
+    from customer_category t2 where t2.name like CONCAT('%',#{name},'%'))
+    OR tt.category_id IN (
+    select
+    (select t3.id from customer_category t3 where t3.parent_id in(select t5.id from customer_category t5
+    where t5.parent_id = t4.id)) as id
+    from customer_category t4 where t4.name like CONCAT('%',#{name},'%'))))
+  </select>
+
+  <select id="selectMaterialIdByResourceId" parameterType="java.lang.Long"
+          resultMap="ResMaterial">
+    SELECT material_id,title,name FROM resource_material WHERE resource_id = #{id}
+  </select>
+</mapper>

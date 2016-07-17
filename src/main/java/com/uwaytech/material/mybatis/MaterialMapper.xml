@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uwaytech.material.dao.MaterialMapper">
+  <resultMap id="BaseResultMap" type="com.uwaytech.material.domain.Material">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="grouping" jdbcType="BIGINT" property="grouping" />
+    <result column="persist_id" jdbcType="VARCHAR" property="persistId" />
+    <result column="hash" jdbcType="VARCHAR" property="hash" />
+    <result column="qiniu_key" jdbcType="VARCHAR" property="qiniuKey" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="media_type" jdbcType="VARCHAR" property="mediaType" />
+    <result column="size" jdbcType="VARCHAR" property="size" />
+    <result column="cus_cate_id" jdbcType="BIGINT" property="cusCateId" />
+    <result column="length" jdbcType="INTEGER" property="length" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="norm_url" jdbcType="VARCHAR" property="normUrl" />
+    <result column="high_url" jdbcType="VARCHAR" property="highUrl" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="qiniu_status" jdbcType="INTEGER" property="qiniuStatus" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, grouping, persist_id, hash, qiniu_key, name, media_type, size, cus_cate_id, length, 
+    url, norm_url, high_url, type, qiniu_status, status, create_time
+  </sql>
+  <select id="selectByExample" parameterType="com.uwaytech.material.domain.MaterialExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from material
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from material
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from material
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.uwaytech.material.domain.MaterialExample">
+    delete from material
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.uwaytech.material.domain.Material">
+    insert into material (id, grouping, persist_id, 
+      hash, qiniu_key, name, 
+      media_type, size, cus_cate_id, 
+      length, url, norm_url, 
+      high_url, type, qiniu_status, 
+      status, create_time)
+    values (#{id,jdbcType=BIGINT}, #{grouping,jdbcType=BIGINT}, #{persistId,jdbcType=VARCHAR}, 
+      #{hash,jdbcType=VARCHAR}, #{qiniuKey,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{mediaType,jdbcType=VARCHAR}, #{size,jdbcType=VARCHAR}, #{cusCateId,jdbcType=BIGINT}, 
+      #{length,jdbcType=INTEGER}, #{url,jdbcType=VARCHAR}, #{normUrl,jdbcType=VARCHAR}, 
+      #{highUrl,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{qiniuStatus,jdbcType=INTEGER}, 
+      #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.uwaytech.material.domain.Material">
+    insert into material
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="grouping != null">
+        grouping,
+      </if>
+      <if test="persistId != null">
+        persist_id,
+      </if>
+      <if test="hash != null">
+        hash,
+      </if>
+      <if test="qiniuKey != null">
+        qiniu_key,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="mediaType != null">
+        media_type,
+      </if>
+      <if test="size != null">
+        size,
+      </if>
+      <if test="cusCateId != null">
+        cus_cate_id,
+      </if>
+      <if test="length != null">
+        length,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+      <if test="normUrl != null">
+        norm_url,
+      </if>
+      <if test="highUrl != null">
+        high_url,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="qiniuStatus != null">
+        qiniu_status,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="grouping != null">
+        #{grouping,jdbcType=BIGINT},
+      </if>
+      <if test="persistId != null">
+        #{persistId,jdbcType=VARCHAR},
+      </if>
+      <if test="hash != null">
+        #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="qiniuKey != null">
+        #{qiniuKey,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="mediaType != null">
+        #{mediaType,jdbcType=VARCHAR},
+      </if>
+      <if test="size != null">
+        #{size,jdbcType=VARCHAR},
+      </if>
+      <if test="cusCateId != null">
+        #{cusCateId,jdbcType=BIGINT},
+      </if>
+      <if test="length != null">
+        #{length,jdbcType=INTEGER},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="normUrl != null">
+        #{normUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="highUrl != null">
+        #{highUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="qiniuStatus != null">
+        #{qiniuStatus,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.uwaytech.material.domain.MaterialExample" resultType="java.lang.Integer">
+    select count(*) from material
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update material
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.grouping != null">
+        grouping = #{record.grouping,jdbcType=BIGINT},
+      </if>
+      <if test="record.persistId != null">
+        persist_id = #{record.persistId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.hash != null">
+        hash = #{record.hash,jdbcType=VARCHAR},
+      </if>
+      <if test="record.qiniuKey != null">
+        qiniu_key = #{record.qiniuKey,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mediaType != null">
+        media_type = #{record.mediaType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.size != null">
+        size = #{record.size,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cusCateId != null">
+        cus_cate_id = #{record.cusCateId,jdbcType=BIGINT},
+      </if>
+      <if test="record.length != null">
+        length = #{record.length,jdbcType=INTEGER},
+      </if>
+      <if test="record.url != null">
+        url = #{record.url,jdbcType=VARCHAR},
+      </if>
+      <if test="record.normUrl != null">
+        norm_url = #{record.normUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.highUrl != null">
+        high_url = #{record.highUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null">
+        type = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.qiniuStatus != null">
+        qiniu_status = #{record.qiniuStatus,jdbcType=INTEGER},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update material
+    set id = #{record.id,jdbcType=BIGINT},
+      grouping = #{record.grouping,jdbcType=BIGINT},
+      persist_id = #{record.persistId,jdbcType=VARCHAR},
+      hash = #{record.hash,jdbcType=VARCHAR},
+      qiniu_key = #{record.qiniuKey,jdbcType=VARCHAR},
+      name = #{record.name,jdbcType=VARCHAR},
+      media_type = #{record.mediaType,jdbcType=VARCHAR},
+      size = #{record.size,jdbcType=VARCHAR},
+      cus_cate_id = #{record.cusCateId,jdbcType=BIGINT},
+      length = #{record.length,jdbcType=INTEGER},
+      url = #{record.url,jdbcType=VARCHAR},
+      norm_url = #{record.normUrl,jdbcType=VARCHAR},
+      high_url = #{record.highUrl,jdbcType=VARCHAR},
+      type = #{record.type,jdbcType=INTEGER},
+      qiniu_status = #{record.qiniuStatus,jdbcType=INTEGER},
+      status = #{record.status,jdbcType=TINYINT},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.uwaytech.material.domain.Material">
+    update material
+    <set>
+      <if test="grouping != null">
+        grouping = #{grouping,jdbcType=BIGINT},
+      </if>
+      <if test="persistId != null">
+        persist_id = #{persistId,jdbcType=VARCHAR},
+      </if>
+      <if test="hash != null">
+        hash = #{hash,jdbcType=VARCHAR},
+      </if>
+      <if test="qiniuKey != null">
+        qiniu_key = #{qiniuKey,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="mediaType != null">
+        media_type = #{mediaType,jdbcType=VARCHAR},
+      </if>
+      <if test="size != null">
+        size = #{size,jdbcType=VARCHAR},
+      </if>
+      <if test="cusCateId != null">
+        cus_cate_id = #{cusCateId,jdbcType=BIGINT},
+      </if>
+      <if test="length != null">
+        length = #{length,jdbcType=INTEGER},
+      </if>
+      <if test="url != null">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="normUrl != null">
+        norm_url = #{normUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="highUrl != null">
+        high_url = #{highUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="qiniuStatus != null">
+        qiniu_status = #{qiniuStatus,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.uwaytech.material.domain.Material">
+    update material
+    set grouping = #{grouping,jdbcType=BIGINT},
+      persist_id = #{persistId,jdbcType=VARCHAR},
+      hash = #{hash,jdbcType=VARCHAR},
+      qiniu_key = #{qiniuKey,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      media_type = #{mediaType,jdbcType=VARCHAR},
+      size = #{size,jdbcType=VARCHAR},
+      cus_cate_id = #{cusCateId,jdbcType=BIGINT},
+      length = #{length,jdbcType=INTEGER},
+      url = #{url,jdbcType=VARCHAR},
+      norm_url = #{normUrl,jdbcType=VARCHAR},
+      high_url = #{highUrl,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      qiniu_status = #{qiniuStatus,jdbcType=INTEGER},
+      status = #{status,jdbcType=TINYINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+</mapper>

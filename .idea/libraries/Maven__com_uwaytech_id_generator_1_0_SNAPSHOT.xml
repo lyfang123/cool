@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.uwaytech:id-generator:1.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/id-generator/1.0-SNAPSHOT/id-generator-1.0-20160531.084528-18.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/id-generator/1.0-SNAPSHOT/id-generator-1.0-20160531.084528-18-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/uwaytech/id-generator/1.0-SNAPSHOT/id-generator-1.0-20160531.084528-18-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

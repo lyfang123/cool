@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="云端校园管理平台" name="Keywords">
+    <meta name="description" content="云端校园管理平台"/>
+    <title>云端校园管理平台登录</title>
+    <style>
+        body {
+            background: url("images/4.jpg") repeat-y;
+            background-size: 100%;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            font-size: 14px;
+            margin: 0px;
+            padding: 0px;
+            line-height: 180%;
+            color: #fff;
+        }
+        
+        *:focus { 
+            outline:none; 
+        }
+        .loginBox_title {
+            text-align: center;
+            font-size: 30px;
+            margin-top: 150px;
+            margin-bottom: 50px;
+        }
+
+        @keyframes loginBox_content {
+            from {
+                transform: rotateY(180deg) scale(0.5, 0.5);
+                opacity: 0;
+            }
+            to {
+                transform: rotateY(0deg) scale(1, 1);
+                opacity: 1;
+            }
+        }
+
+        .loginBox_content {
+            width: 405px;
+            margin: 40px auto;
+            color: #888;
+            animation: loginBox_content 1s 1;
+        }
+
+        .loginBox_content_t {
+            background: #fff;
+            min-height: 15px;
+            border-radius:5px 5px 0px 0px;
+        }
+
+        .loginBox_content_t1 {
+            text-align: right;
+            background-color: #ffe4d8;
+            margin-top: 20px;
+            margin-left: 35px;
+            width: 325px;
+            padding: 0px 5px;
+            line-height: 30px;
+            float: left;
+            display: none;
+        }
+
+        .loginBox_content_c {
+            padding: 10px 0px 20px 0px;
+            border-radius: 0px 0px 5px 5px;
+            background: #ffffff;
+        }
+
+        .loginBox_content_c_div {
+            margin: 10px 23px;
+            text-align: center;
+        }
+
+        .input {
+            width: 300px;
+            border: 1px solid #eeeeee;
+            background: #fff;
+            border-radius: 5px;
+            line-height: 35px;
+            height:35px;
+            padding: 0px 10px;
+            padding-left: 25px;
+            margin-left: 1px;
+        }
+        input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px white inset;
+        }
+
+        .inputSub {
+            width: 95%;
+            border: none;
+            background: #00b7ee;
+            border-radius: 5px;
+            cursor: pointer;
+            line-height: 45px;
+            font-size: 18px;
+            color: #fff;
+            font-family: "Microsoft YaHei";
+        }
+
+        .loginBox_bottom {
+            text-align: center;
+            padding-top: 20px;;
+        }
+        .loginBox_content_b{
+            width: 98%;
+            margin: 0px auto;
+            height: 8px;
+            border-radius: 0px 0px 5px 5px;
+            background: #f4f4f4;
+        }
+        .footBtns {
+            text-align: center;
+            padding: 50px 0px;
+        }
+
+        .footBtns a {
+            border-radius: 5px;
+            padding: 10px 50px;
+            margin: 20px;
+            border: 1px solid #fff;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .footBtns a:hover {
+            background: #000;
+        }
+        #ajaxText{
+            color: #ff6776;
+            float: left;
+        }
+        #closeBtn{
+            cursor: pointer;
+            color: #fff;
+            background-color: #fa6f1b;
+            padding: 0px 5px;
+            border-radius: 10px;
+            font-family: Arial;
+        }
+        .inputImg{
+            position: absolute;
+            margin-top: 10px;
+            margin-left: 7px;
+        }
+    </style>
+</head>
+<body>
+<form id="form1">
+    <div class="loginBox">
+        <div class="loginBox_title">云端校园管理平台</div>
+        <div class="loginBox_content">
+            <div class="loginBox_content_t">
+                <div class="loginBox_content_t1 gery"><span id="ajaxText">请输入账号密码...</span><span id="closeBtn">x</span></div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="loginBox_content_c">
+                <div class="loginBox_content_c_div"><img class="inputImg" src="images/icon_login_user.png" /><input class="input" id="account" placeholder="用户名..." type="text"/>
+                </div>
+                <div class="loginBox_content_c_div"><img class="inputImg" src="images/icon_login_pwd.png" /><input class="input" id="password" placeholder="密码..."
+                                                           type="password"/></div>
+                <div class="loginBox_content_c_div" style="text-align: right; margin-right: 40px;">
+                    <input id="jzmm" type="checkbox" />记住密码
+                </div>
+                <div class="loginBox_content_c_div">
+                    <input class="inputSub" id="login" type="submit" value="登   录"/>
+                </div>
+            </div>
+            <div class="loginBox_content_b"></div>
+        </div>
+        <div class="loginBox_bottom">2016 © 联和纵道科技股份有限公司版权所有.</div>
+        <!--<div class="footBtns"><a href="registe.html">注册</a></div>-->
+    </div>
+</form>
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/MD5.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript">
+    $("#closeBtn").click(function(){
+        $(this).parent().hide();
+    })
+    if(localStorage.account && localStorage.password){
+        $("#account").val(localStorage.account);
+        $("#password").val(localStorage.password);
+    }
+    $("#form1").submit(function(e){
+        var account = $("#account").val();
+        var password = $("#password").val();
+        if (!account || !password) {
+            $("#ajaxText").parent().show();
+            $("#ajaxText").html("用户名和密码不能为空");
+            return false;
+        }
+        if (e && e.preventDefault ){
+            e.preventDefault();
+        } else{
+            window.event.returnValue = false;
+            return false;
+        }
+        $("#ajaxText").parent().show();
+        $("#ajaxText").html("正在登陆,请稍后...");
+        $.ajax({
+            url: ucIP + "/api/uc/v0.1/login",
+            type: "POST",
+            dataType: "json",
+            data: {account: account, password: MD5(password), clientType: 2},//clientType:2 教师端,loginType:1 账号密码方式登陆
+            success: function (res) {
+                if (res) {
+                    if(document.getElementById("jzmm").checked){
+                       localStorage.password = password;
+                       localStorage.account = account;
+                    }
+                    localStorage.user = JSON.stringify(res);
+                    location = "index.html";
+                } else {
+                    $("#ajaxText").parent().show();
+                    $("#ajaxText").html("登录失败");
+                }
+            },
+            fail: function (e) {
+                $("#ajaxText").parent().show();
+                $("#ajaxText").html("登录失败");
+            },
+            error: function (e) {
+                $("#ajaxText").parent().show();
+                $("#ajaxText").html("登录出错");
+            }
+        })
+    })
+</script>
+</body>
+</html>
