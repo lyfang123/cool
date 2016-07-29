@@ -38,6 +38,7 @@ public class BrowsingController {
         return new SuccessResult();
     }
 
+
     @RequestMapping(value = "/v0.1/user", method = RequestMethod.DELETE)
     public Object deleteAllBrowse() {
         Long userId = SessionUtils.getUserId();
